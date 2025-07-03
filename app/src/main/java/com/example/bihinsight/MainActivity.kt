@@ -20,8 +20,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import com.example.bihinsight.data.remote.IssuedDLCardApiService
 import com.example.bihinsight.data.repository.IssuedDLCardRepository
-import com.example.bihinsight.ui.screens.registrations.IssuedDLCardScreen
-import com.example.bihinsight.ui.screens.registrations.IssuedDLCardViewModel
+import com.example.bihinsight.ui.screens.issueddlcards.IssuedDLCardScreen
+import com.example.bihinsight.ui.screens.issueddlcards.IssuedDLCardViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 

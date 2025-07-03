@@ -1,4 +1,4 @@
-package com.example.bihinsight.ui.screens.registrations
+package com.example.bihinsight.ui.screens.issueddlcards
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
