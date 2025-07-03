@@ -1,0 +1,41 @@
+# Android Studio
+.idea/
+*.iml
+
+# Build folders
+/build/
+app/build/
+
+# Gradle
+.gradle/
+/local.properties
+/.gradle/
+/captures/
+
+# Log, temp, and OS files
+*.log
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# User-specific files
+*.keystore
+*.jks
+
+# Crashlytics and Fabric
+crashlytics.properties
+fabric.properties
+
+# Generated files
+*.apk
+*.ap_ 
+
+# Misc
+*.orig
+
+# Exclude test result files
+/test-output/
+
+# Exclude documentation output (if generated)
+/documentation/output/
