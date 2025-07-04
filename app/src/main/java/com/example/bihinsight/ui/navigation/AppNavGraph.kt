@@ -24,6 +24,7 @@ import kotlinx.coroutines.delay
 import com.example.bihinsight.ui.screens.onboarding.OnboardingScreen
 import android.content.Context
 import android.content.SharedPreferences
+import com.example.bihinsight.ui.screens.home.DatasetSelectionScreen
 
 @Composable
 fun AppNavGraph(
@@ -65,10 +66,26 @@ fun AppNavGraph(
             })
         }
         composable("list") {
+            val context = LocalContext.current
+            val prefs = context.getSharedPreferences("bihinsight_prefs", Context.MODE_PRIVATE)
+            val selectedDataset = prefs.getString("selected_dataset", "Izdate vozačke dozvole") ?: "Izdate vozačke dozvole"
             IssuedDLCardScreen(
                 viewModel,
                 onCardClick = { cardId -> navController.navigate("details/$cardId") },
-                onFavoritesClick = { navController.navigate("favorites") }
+                onFavoritesClick = { navController.navigate("favorites") },
+                onDatasetClick = { navController.navigate("dataset_selection") }
+            )
+        }
+        composable("dataset_selection") {
+            val context = LocalContext.current
+            val prefs = context.getSharedPreferences("bihinsight_prefs", Context.MODE_PRIVATE)
+            val selectedDataset = prefs.getString("selected_dataset", "Izdate vozačke dozvole") ?: "Izdate vozačke dozvole"
+            DatasetSelectionScreen(
+                selectedDataset = selectedDataset,
+                onDatasetSelected = { dataset ->
+                    prefs.edit().putString("selected_dataset", dataset).apply()
+                },
+                onConfirm = { navController.popBackStack() }
             )
         }
         composable(

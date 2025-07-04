@@ -31,13 +31,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Settings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IssuedDLCardScreen(
     viewModel: IssuedDLCardViewModel,
     onCardClick: (Int) -> Unit = {},
-    onFavoritesClick: () -> Unit = {}
+    onFavoritesClick: () -> Unit = {},
+    onDatasetClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val filterText by viewModel.filterText.collectAsState()
@@ -60,6 +62,9 @@ fun IssuedDLCardScreen(
             actions = {
                 IconButton(onClick = onFavoritesClick) {
                     Icon(Icons.Filled.Star, contentDescription = "Favoriti")
+                }
+                IconButton(onClick = onDatasetClick) {
+                    Icon(Icons.Filled.Settings, contentDescription = "Izbor skupa podataka")
                 }
             }
         )
