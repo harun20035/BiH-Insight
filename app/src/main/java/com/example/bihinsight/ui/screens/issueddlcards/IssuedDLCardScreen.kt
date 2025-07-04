@@ -32,6 +32,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Settings
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,111 +58,119 @@ fun IssuedDLCardScreen(
     // Prikupi sve godine iz trenutnog state-a (za dropdown)
     val allYears = (uiState as? IssuedDLCardUiState.Success)?.cards?.mapNotNull { it.year }?.distinct()?.sorted() ?: emptyList()
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(
-            title = { Text("Izdate vozačke dozvole") },
-            actions = {
-                IconButton(onClick = onFavoritesClick) {
-                    Icon(Icons.Filled.Star, contentDescription = "Favoriti")
-                }
-                IconButton(onClick = onDatasetClick) {
-                    Icon(Icons.Filled.Settings, contentDescription = "Izbor skupa podataka")
-                }
-            }
-        )
-        ExposedDropdownMenuBox(
-            expanded = sortExpanded.value,
-            onExpandedChange = { sortExpanded.value = !sortExpanded.value },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            OutlinedTextField(
-                value = sortOptions.first { it.first == sortOption }.second,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Sortiraj po") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = sortExpanded.value) },
-                modifier = Modifier.menuAnchor().fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors()
-            )
-            DropdownMenu(
-                expanded = sortExpanded.value,
-                onDismissRequest = { sortExpanded.value = false }
-            ) {
-                sortOptions.forEach { (option, label) ->
-                    DropdownMenuItem(
-                        text = { Text(label) },
-                        onClick = {
-                            viewModel.setSortOption(option)
-                            sortExpanded.value = false
-                        }
-                    )
-                }
-            }
-        }
-        OutlinedTextField(
-            value = filterText,
-            onValueChange = { viewModel.setFilterText(it) },
-            label = { Text("Pretraži po općini") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        )
-        ExposedDropdownMenuBox(
-            expanded = expanded.value,
-            onExpandedChange = { expanded.value = !expanded.value },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            OutlinedTextField(
-                value = yearFilter?.toString() ?: "",
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Godina") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded.value) },
-                modifier = Modifier.menuAnchor().fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors()
-            )
-            DropdownMenu(
-                expanded = expanded.value,
-                onDismissRequest = { expanded.value = false }
-            ) {
-                DropdownMenuItem(
-                    text = { Text("Sve godine") },
-                    onClick = {
-                        viewModel.setYearFilter(null)
-                        expanded.value = false
+    val isRefreshing = uiState is IssuedDLCardUiState.Loading
+    val swipeRefreshState = rememberSwipeRefreshState(isRefreshing)
+
+    SwipeRefresh(
+        state = swipeRefreshState,
+        onRefresh = { viewModel.fetchIssuedDL() }
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            TopAppBar(
+                title = { Text("Izdate vozačke dozvole") },
+                actions = {
+                    IconButton(onClick = onFavoritesClick) {
+                        Icon(Icons.Filled.Star, contentDescription = "Favoriti")
                     }
+                    IconButton(onClick = onDatasetClick) {
+                        Icon(Icons.Filled.Settings, contentDescription = "Izbor skupa podataka")
+                    }
+                }
+            )
+            ExposedDropdownMenuBox(
+                expanded = sortExpanded.value,
+                onExpandedChange = { sortExpanded.value = !sortExpanded.value },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                OutlinedTextField(
+                    value = sortOptions.first { it.first == sortOption }.second,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Sortiraj po") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = sortExpanded.value) },
+                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors()
                 )
-                allYears.forEach { year ->
+                DropdownMenu(
+                    expanded = sortExpanded.value,
+                    onDismissRequest = { sortExpanded.value = false }
+                ) {
+                    sortOptions.forEach { (option, label) ->
+                        DropdownMenuItem(
+                            text = { Text(label) },
+                            onClick = {
+                                viewModel.setSortOption(option)
+                                sortExpanded.value = false
+                            }
+                        )
+                    }
+                }
+            }
+            OutlinedTextField(
+                value = filterText,
+                onValueChange = { viewModel.setFilterText(it) },
+                label = { Text("Pretraži po općini") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            )
+            ExposedDropdownMenuBox(
+                expanded = expanded.value,
+                onExpandedChange = { expanded.value = !expanded.value },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                OutlinedTextField(
+                    value = yearFilter?.toString() ?: "",
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Godina") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded.value) },
+                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors()
+                )
+                DropdownMenu(
+                    expanded = expanded.value,
+                    onDismissRequest = { expanded.value = false }
+                ) {
                     DropdownMenuItem(
-                        text = { Text(year.toString()) },
+                        text = { Text("Sve godine") },
                         onClick = {
-                            viewModel.setYearFilter(year)
+                            viewModel.setYearFilter(null)
                             expanded.value = false
                         }
                     )
+                    allYears.forEach { year ->
+                        DropdownMenuItem(
+                            text = { Text(year.toString()) },
+                            onClick = {
+                                viewModel.setYearFilter(year)
+                                expanded.value = false
+                            }
+                        )
+                    }
                 }
             }
-        }
-        Box(modifier = Modifier.weight(1f)) {
-            when (uiState) {
-                is IssuedDLCardUiState.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+            Box(modifier = Modifier.weight(1f)) {
+                when (uiState) {
+                    is IssuedDLCardUiState.Loading -> {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator()
+                        }
                     }
-                }
-                is IssuedDLCardUiState.Error -> {
-                    val message = (uiState as IssuedDLCardUiState.Error).message
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(text = "Greška: $message")
+                    is IssuedDLCardUiState.Error -> {
+                        val message = (uiState as IssuedDLCardUiState.Error).message
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text(text = "Greška: $message")
+                        }
                     }
-                }
-                is IssuedDLCardUiState.Success -> {
-                    val cards = (uiState as IssuedDLCardUiState.Success).cards
-                    IssuedDLCardList(cards, onCardClick)
+                    is IssuedDLCardUiState.Success -> {
+                        val cards = (uiState as IssuedDLCardUiState.Success).cards
+                        IssuedDLCardList(cards, onCardClick)
+                    }
                 }
             }
         }
