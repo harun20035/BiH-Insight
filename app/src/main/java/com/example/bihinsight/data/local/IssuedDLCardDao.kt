@@ -15,4 +15,17 @@ interface IssuedDLCardDao {
 
     @Query("DELETE FROM issued_dl_cards")
     suspend fun deleteAll()
+
+    @Query("SELECT * FROM issued_dl_cards WHERE municipality LIKE '%' || :query || '%'")
+    suspend fun filterByMunicipality(query: String): List<IssuedDLCardEntity>
+
+    @Query("""
+        SELECT * FROM issued_dl_cards
+        WHERE (:municipality IS NULL OR municipality LIKE '%' || :municipality || '%')
+        AND (:year IS NULL OR year = :year)
+    """)
+    suspend fun filterCombined(
+        municipality: String?,
+        year: Int?
+    ): List<IssuedDLCardEntity>
 } 

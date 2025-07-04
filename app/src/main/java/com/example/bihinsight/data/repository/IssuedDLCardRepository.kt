@@ -23,6 +23,16 @@ class IssuedDLCardRepository(
         withContext(Dispatchers.IO) {
             dao.getAllIssuedDL()
         }
+
+    suspend fun filterByMunicipality(query: String): List<IssuedDLCardEntity> =
+        withContext(Dispatchers.IO) {
+            dao.filterByMunicipality(query)
+        }
+
+    suspend fun filterCombined(municipality: String?, year: Int?): List<IssuedDLCardEntity> =
+        withContext(Dispatchers.IO) {
+            dao.filterCombined(municipality, year)
+        }
 }
 
 // Mapiranje iz IssuedDLCard (API model) u IssuedDLCardEntity (baza)

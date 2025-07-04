@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.update
 
 sealed class IssuedDLCardUiState {
     object Loading : IssuedDLCardUiState()
@@ -22,6 +23,16 @@ class IssuedDLCardViewModel(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<IssuedDLCardUiState>(IssuedDLCardUiState.Loading)
     val uiState: StateFlow<IssuedDLCardUiState> = _uiState.asStateFlow()
+
+    private val _filterText = MutableStateFlow("")
+    val filterText: StateFlow<String> = _filterText.asStateFlow()
+
+    private val _yearFilter = MutableStateFlow<Int?>(null)
+    val yearFilter: StateFlow<Int?> = _yearFilter.asStateFlow()
+
+    enum class SortOption { MUNICIPALITY, YEAR_DESC, TOTAL_DESC }
+    private val _sortOption = MutableStateFlow(SortOption.MUNICIPALITY)
+    val sortOption: StateFlow<SortOption> = _sortOption.asStateFlow()
 
     init {
         fetchIssuedDL()
@@ -38,5 +49,40 @@ class IssuedDLCardViewModel(
                 _uiState.value = IssuedDLCardUiState.Error(e.message ?: "Unknown error")
             }
         }
+    }
+
+    fun setYearFilter(year: Int?) {
+        _yearFilter.value = year
+        filterCombined()
+    }
+
+    fun setSortOption(option: SortOption) {
+        _sortOption.value = option
+        filterCombined()
+    }
+
+    private fun filterCombined() {
+        viewModelScope.launch {
+            _uiState.value = IssuedDLCardUiState.Loading
+            try {
+                val data = repository.filterCombined(
+                    municipality = _filterText.value.takeIf { it.isNotBlank() },
+                    year = _yearFilter.value
+                )
+                val sorted = when (_sortOption.value) {
+                    SortOption.MUNICIPALITY -> data.sortedBy { it.municipality ?: "" }
+                    SortOption.YEAR_DESC -> data.sortedByDescending { it.year ?: 0 }
+                    SortOption.TOTAL_DESC -> data.sortedByDescending { it.total ?: 0 }
+                }
+                _uiState.value = IssuedDLCardUiState.Success(sorted)
+            } catch (e: Exception) {
+                _uiState.value = IssuedDLCardUiState.Error(e.message ?: "Unknown error")
+            }
+        }
+    }
+
+    fun setFilterText(text: String) {
+        _filterText.value = text
+        filterCombined()
     }
 } 

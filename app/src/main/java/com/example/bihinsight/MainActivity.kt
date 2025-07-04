@@ -24,6 +24,13 @@ import com.example.bihinsight.ui.screens.issueddlcards.IssuedDLCardScreen
 import com.example.bihinsight.ui.screens.issueddlcards.IssuedDLCardViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import com.example.bihinsight.ui.screens.details.IssuedDLCardDetailsScreen
+import com.example.bihinsight.ui.navigation.AppNavGraph
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,10 +61,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             BiHInsightTheme {
                 Surface {
+                    val navController = rememberNavController()
                     val viewModel: IssuedDLCardViewModel = viewModel(
                         factory = IssuedDLCardViewModelFactory(repository, token, languageId)
                     )
-                    IssuedDLCardScreen(viewModel)
+                    AppNavGraph(
+                        navController = navController,
+                        viewModel = viewModel
+                    )
                 }
             }
         }
