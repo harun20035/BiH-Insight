@@ -46,6 +46,9 @@ interface IssuedDLCardDao {
     @Query("SELECT * FROM issued_dl_cards WHERE id = :id LIMIT 1")
     fun observeById(id: Int): Flow<IssuedDLCardEntity?>
 
+    @Query("SELECT * FROM issued_dl_cards WHERE isFavorite = 1")
+    fun observeFavorites(): Flow<List<IssuedDLCardEntity>>
+
     @Update
     suspend fun updateCard(card: IssuedDLCardEntity)
 } 

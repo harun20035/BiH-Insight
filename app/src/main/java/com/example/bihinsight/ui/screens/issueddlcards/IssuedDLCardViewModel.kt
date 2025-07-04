@@ -1,5 +1,6 @@
 package com.example.bihinsight.ui.screens.issueddlcards
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bihinsight.data.local.IssuedDLCardEntity
@@ -104,6 +105,8 @@ class IssuedDLCardViewModel(
             val card = repository.getById(id)
             if (card != null) {
                 repository.updateCard(card.copy(isFavorite = true))
+                val updated = repository.getById(id)
+                Log.d("FAV_DEBUG", "addToFavorites: id=$id, isFavorite=${updated?.isFavorite}")
             }
             filterCombined()
         }
@@ -114,6 +117,8 @@ class IssuedDLCardViewModel(
             val card = repository.getById(id)
             if (card != null) {
                 repository.updateCard(card.copy(isFavorite = false))
+                val updated = repository.getById(id)
+                Log.d("FAV_DEBUG", "removeFromFavorites: id=$id, isFavorite=${updated?.isFavorite}")
             }
             filterCombined()
         }
@@ -127,4 +132,6 @@ class IssuedDLCardViewModel(
     }
 
     fun observeDetailCard(id: Int) = repository.observeById(id)
+
+    fun observeFavorites() = repository.observeFavorites()
 } 

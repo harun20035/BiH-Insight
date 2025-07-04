@@ -39,6 +39,7 @@ fun AppNavGraph(
         composable("splash") {
             val context = LocalContext.current
             val prefs = context.getSharedPreferences("bihinsight_prefs", Context.MODE_PRIVATE)
+            prefs.edit().putBoolean("onboarding_done", false).apply()
             LaunchedEffect(Unit) {
                 delay(1500)
                 if (prefs.getBoolean("onboarding_done", false)) {
@@ -101,8 +102,7 @@ fun AppNavGraph(
             }
         }
         composable("favorites") {
-            var favorites: List<IssuedDLCardEntity> = emptyList()
-            viewModel.getFavorites { favs -> favorites = favs }
+            val favorites by viewModel.observeFavorites().collectAsState(initial = emptyList())
             FavoritesScreen(favorites = favorites, onCardClick = { cardId ->
                 navController.navigate("details/$cardId")
             })

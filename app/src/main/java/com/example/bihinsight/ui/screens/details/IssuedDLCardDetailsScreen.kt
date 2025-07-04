@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,11 +38,11 @@ fun IssuedDLCardDetailsScreen(
                 },
                 actions = {
                     IconButton(onClick = { onToggleFavorite(!card.isFavorite) }) {
-                        if (card.isFavorite) {
-                            Icon(Icons.Filled.Star, contentDescription = "Ukloni iz favorita")
-                        } else {
-                            Icon(Icons.Outlined.Star, contentDescription = "Dodaj u favorite")
-                        }
+                        Icon(
+                            imageVector = if (card.isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
+                            contentDescription = if (card.isFavorite) "Ukloni iz favorita" else "Dodaj u favorite",
+                            tint = if (card.isFavorite) Color(0xFFFFC107) else MaterialTheme.colorScheme.onSurface
+                        )
                     }
                     IconButton(onClick = {
                         val shareText = "Općina: ${card.municipality ?: "Nepoznato"}\n" +

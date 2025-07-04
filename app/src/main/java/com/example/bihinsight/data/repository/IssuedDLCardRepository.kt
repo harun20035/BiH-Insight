@@ -43,6 +43,8 @@ class IssuedDLCardRepository(
     fun observeById(id: Int) = dao.observeById(id)
 
     suspend fun updateCard(card: IssuedDLCardEntity) = withContext(Dispatchers.IO) { dao.updateCard(card) }
+
+    fun observeFavorites() = dao.observeFavorites()
 }
 
 // Mapiranje iz IssuedDLCard (API model) u IssuedDLCardEntity (baza)
