@@ -33,6 +33,16 @@ class IssuedDLCardRepository(
         withContext(Dispatchers.IO) {
             dao.filterCombined(municipality, year)
         }
+
+    suspend fun addToFavorites(id: Int) = withContext(Dispatchers.IO) { dao.addToFavorites(id) }
+    suspend fun removeFromFavorites(id: Int) = withContext(Dispatchers.IO) { dao.removeFromFavorites(id) }
+    suspend fun getFavorites(): List<IssuedDLCardEntity> = withContext(Dispatchers.IO) { dao.getFavorites() }
+
+    suspend fun getById(id: Int): IssuedDLCardEntity? = withContext(Dispatchers.IO) { dao.getById(id) }
+
+    fun observeById(id: Int) = dao.observeById(id)
+
+    suspend fun updateCard(card: IssuedDLCardEntity) = withContext(Dispatchers.IO) { dao.updateCard(card) }
 }
 
 // Mapiranje iz IssuedDLCard (API model) u IssuedDLCardEntity (baza)

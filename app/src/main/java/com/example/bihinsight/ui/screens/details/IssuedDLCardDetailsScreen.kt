@@ -13,11 +13,19 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun IssuedDLCardDetailsScreen(card: IssuedDLCardEntity, onBack: () -> Unit) {
+fun IssuedDLCardDetailsScreen(
+    card: IssuedDLCardEntity,
+    onBack: () -> Unit,
+    onToggleFavorite: (Boolean) -> Unit = {},
+    onShare: (String) -> Unit = {}
+) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Column {
             TopAppBar(
@@ -25,6 +33,24 @@ fun IssuedDLCardDetailsScreen(card: IssuedDLCardEntity, onBack: () -> Unit) {
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = "Nazad")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { onToggleFavorite(!card.isFavorite) }) {
+                        if (card.isFavorite) {
+                            Icon(Icons.Filled.Star, contentDescription = "Ukloni iz favorita")
+                        } else {
+                            Icon(Icons.Outlined.Star, contentDescription = "Dodaj u favorite")
+                        }
+                    }
+                    IconButton(onClick = {
+                        val shareText = "Općina: ${card.municipality ?: "Nepoznato"}\n" +
+                            "Godina: ${card.year ?: "-"}\n" +
+                            "Ukupno: ${card.total ?: "-"}\n" +
+                            "Više u aplikaciji BiH Insight!"
+                        onShare(shareText)
+                    }) {
+                        Icon(Icons.Filled.Share, contentDescription = "Podijeli")
                     }
                 }
             )

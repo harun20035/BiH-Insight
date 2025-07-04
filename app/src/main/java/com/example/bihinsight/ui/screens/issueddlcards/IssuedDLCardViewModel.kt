@@ -34,6 +34,9 @@ class IssuedDLCardViewModel(
     private val _sortOption = MutableStateFlow(SortOption.MUNICIPALITY)
     val sortOption: StateFlow<SortOption> = _sortOption.asStateFlow()
 
+    private val _detailCard = MutableStateFlow<IssuedDLCardEntity?>(null)
+    val detailCard: StateFlow<IssuedDLCardEntity?> = _detailCard.asStateFlow()
+
     init {
         fetchIssuedDL()
     }
@@ -85,4 +88,43 @@ class IssuedDLCardViewModel(
         _filterText.value = text
         filterCombined()
     }
+
+    fun loadDetailCard(id: Int) {
+        viewModelScope.launch {
+            _detailCard.value = repository.getById(id)
+        }
+    }
+
+    fun refreshDetailCard() {
+        _detailCard.value?.id?.let { loadDetailCard(it) }
+    }
+
+    fun addToFavorites(id: Int) {
+        viewModelScope.launch {
+            val card = repository.getById(id)
+            if (card != null) {
+                repository.updateCard(card.copy(isFavorite = true))
+            }
+            filterCombined()
+        }
+    }
+
+    fun removeFromFavorites(id: Int) {
+        viewModelScope.launch {
+            val card = repository.getById(id)
+            if (card != null) {
+                repository.updateCard(card.copy(isFavorite = false))
+            }
+            filterCombined()
+        }
+    }
+
+    fun getFavorites(onResult: (List<IssuedDLCardEntity>) -> Unit) {
+        viewModelScope.launch {
+            val favorites = repository.getFavorites()
+            onResult(favorites)
+        }
+    }
+
+    fun observeDetailCard(id: Int) = repository.observeById(id)
 } 

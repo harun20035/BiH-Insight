@@ -18,5 +18,6 @@ data class IssuedDLCardEntity(
     val replacedMaleTotal: Int?,
     val issuedFirstTimeFemaleTotal: Int?,
     val replacedFemaleTotal: Int?,
-    val total: Int?
+    val total: Int?,
+    val isFavorite: Boolean = false
 ) 

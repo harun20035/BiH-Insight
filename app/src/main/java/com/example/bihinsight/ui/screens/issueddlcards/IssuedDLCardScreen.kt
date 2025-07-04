@@ -26,12 +26,18 @@ import androidx.compose.ui.unit.dp
 import com.example.bihinsight.data.local.IssuedDLCardEntity
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.foundation.clickable
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IssuedDLCardScreen(
     viewModel: IssuedDLCardViewModel,
-    onCardClick: (Int) -> Unit = {}
+    onCardClick: (Int) -> Unit = {},
+    onFavoritesClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val filterText by viewModel.filterText.collectAsState()
@@ -49,6 +55,14 @@ fun IssuedDLCardScreen(
     val allYears = (uiState as? IssuedDLCardUiState.Success)?.cards?.mapNotNull { it.year }?.distinct()?.sorted() ?: emptyList()
 
     Column(modifier = Modifier.fillMaxSize()) {
+        TopAppBar(
+            title = { Text("Izdate vozačke dozvole") },
+            actions = {
+                IconButton(onClick = onFavoritesClick) {
+                    Icon(Icons.Filled.Star, contentDescription = "Favoriti")
+                }
+            }
+        )
         ExposedDropdownMenuBox(
             expanded = sortExpanded.value,
             onExpandedChange = { sortExpanded.value = !sortExpanded.value },

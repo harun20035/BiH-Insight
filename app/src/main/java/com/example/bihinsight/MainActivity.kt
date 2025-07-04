@@ -42,7 +42,7 @@ class MainActivity : ComponentActivity() {
             applicationContext,
             AppDatabase::class.java,
             "bihinsight-db"
-        ).build()
+        ).fallbackToDestructiveMigration().build()
 
         // Inicijalizacija Retrofit servisa
         val retrofit = Retrofit.Builder()
@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
         val apiService = retrofit.create(IssuedDLCardApiService::class.java)
 
         // Token za API (ako je potreban)
-        val token: String? = "Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyMjE3IiwibmJmIjoxNzUxNTc0Nzc0LCJleHAiOjE3NTE2NjExNzQsImlhdCI6MTc1MTU3NDc3NH0.bl97mbiYoIuhExztq9M-W0364mAWPrpIHaXxdi5RT5FbfkWtjmFspcuR7-MYaTIWbNO4ibMsG3WHK-q5UGbZOA"
+        val token: String? = "Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyMjE3IiwibmJmIjoxNzUxNjQxOTExLCJleHAiOjE3NTE3MjgzMTEsImlhdCI6MTc1MTY0MTkxMX0.IFsPveqnb6X_E8qVyaVI-5bTK_9l-ZPTm24UUV31MB5jgRm2Uur3ZxLeor2jIqJh9xcyzk2e3BaZ_SIAKsoZ-Q"
         val languageId = 1
 
         // Inicijalizacija repository-ja
