@@ -16,6 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.bihinsight.data.local.IssuedDLCardEntity
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.Alignment
 
 @Composable
 fun FavoritesScreen(favorites: List<IssuedDLCardEntity>, onCardClick: (Int) -> Unit) {
@@ -26,7 +28,9 @@ fun FavoritesScreen(favorites: List<IssuedDLCardEntity>, onCardClick: (Int) -> U
             modifier = Modifier.padding(bottom = 16.dp)
         )
         if (favorites.isEmpty()) {
-            Text("Nema sačuvanih favorita.")
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Nema sačuvanih favorita.", style = MaterialTheme.typography.bodyLarge)
+            }
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(favorites) { card ->

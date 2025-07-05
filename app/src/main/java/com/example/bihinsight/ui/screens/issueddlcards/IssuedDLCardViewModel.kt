@@ -31,6 +31,9 @@ class IssuedDLCardViewModel(
     private val _yearFilter = MutableStateFlow<Int?>(null)
     val yearFilter: StateFlow<Int?> = _yearFilter.asStateFlow()
 
+    private val _entityFilter = MutableStateFlow<String?>(null)
+    val entityFilter: StateFlow<String?> = _entityFilter.asStateFlow()
+
     enum class SortOption { MUNICIPALITY, YEAR_DESC, TOTAL_DESC }
     private val _sortOption = MutableStateFlow(SortOption.MUNICIPALITY)
     val sortOption: StateFlow<SortOption> = _sortOption.asStateFlow()
@@ -60,6 +63,11 @@ class IssuedDLCardViewModel(
         filterCombined()
     }
 
+    fun setEntityFilter(entity: String?) {
+        _entityFilter.value = entity
+        filterCombined()
+    }
+
     fun setSortOption(option: SortOption) {
         _sortOption.value = option
         filterCombined()
@@ -73,10 +81,18 @@ class IssuedDLCardViewModel(
                     municipality = _filterText.value.takeIf { it.isNotBlank() },
                     year = _yearFilter.value
                 )
+                
+                // Dodatno filtriranje po entitetu
+                val entityFiltered = if (_entityFilter.value != null) {
+                    data.filter { it.entity == _entityFilter.value }
+                } else {
+                    data
+                }
+                
                 val sorted = when (_sortOption.value) {
-                    SortOption.MUNICIPALITY -> data.sortedBy { it.municipality ?: "" }
-                    SortOption.YEAR_DESC -> data.sortedByDescending { it.year ?: 0 }
-                    SortOption.TOTAL_DESC -> data.sortedByDescending { it.total ?: 0 }
+                    SortOption.MUNICIPALITY -> entityFiltered.sortedBy { it.municipality ?: "" }
+                    SortOption.YEAR_DESC -> entityFiltered.sortedByDescending { it.year ?: 0 }
+                    SortOption.TOTAL_DESC -> entityFiltered.sortedByDescending { it.total ?: 0 }
                 }
                 _uiState.value = IssuedDLCardUiState.Success(sorted)
             } catch (e: Exception) {

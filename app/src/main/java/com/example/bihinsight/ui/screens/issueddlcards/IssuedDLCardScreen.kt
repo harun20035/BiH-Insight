@@ -34,6 +34,9 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Settings
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import androidx.compose.material3.FilterChip
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,6 +61,10 @@ fun IssuedDLCardScreen(
     // Prikupi sve godine iz trenutnog state-a (za dropdown)
     val allYears = (uiState as? IssuedDLCardUiState.Success)?.cards?.mapNotNull { it.year }?.distinct()?.sorted() ?: emptyList()
 
+    // Prikupi sve entitete za ChipGroup
+    val allEntities = (uiState as? IssuedDLCardUiState.Success)?.cards?.mapNotNull { it.entity }?.distinct()?.sorted() ?: emptyList()
+    val selectedEntity = remember { mutableStateOf<String?>(null) }
+
     val isRefreshing = uiState is IssuedDLCardUiState.Loading
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing)
 
@@ -77,6 +84,38 @@ fun IssuedDLCardScreen(
                     }
                 }
             )
+            
+            // ChipGroup za filtriranje po entitetima
+            if (allEntities.isNotEmpty()) {
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    item {
+                        FilterChip(
+                            selected = selectedEntity.value == null,
+                            onClick = { 
+                                selectedEntity.value = null
+                                viewModel.setEntityFilter(null)
+                            },
+                            label = { Text("Svi entiteti") }
+                        )
+                    }
+                    items(allEntities) { entity ->
+                        FilterChip(
+                            selected = selectedEntity.value == entity,
+                            onClick = { 
+                                selectedEntity.value = entity
+                                viewModel.setEntityFilter(entity)
+                            },
+                            label = { Text(entity) }
+                        )
+                    }
+                }
+            }
+            
             ExposedDropdownMenuBox(
                 expanded = sortExpanded.value,
                 onExpandedChange = { sortExpanded.value = !sortExpanded.value },
@@ -163,13 +202,28 @@ fun IssuedDLCardScreen(
                     }
                     is IssuedDLCardUiState.Error -> {
                         val message = (uiState as IssuedDLCardUiState.Error).message
+                        val userMessage = if (message.contains("500")) {
+                            "Došlo je do greške na serveru. Pokušajte ponovo kasnije."
+                        } else {
+                            "Greška: $message"
+                        }
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(text = "Greška: $message")
+                            Text(
+                                text = userMessage,
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(horizontal = 32.dp)
+                            )
                         }
                     }
                     is IssuedDLCardUiState.Success -> {
                         val cards = (uiState as IssuedDLCardUiState.Success).cards
-                        IssuedDLCardList(cards, onCardClick)
+                        if (cards.isEmpty()) {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Text(text = "Nema podataka za prikaz.", style = MaterialTheme.typography.bodyLarge)
+                            }
+                        } else {
+                            IssuedDLCardList(cards, onCardClick)
+                        }
                     }
                 }
             }
