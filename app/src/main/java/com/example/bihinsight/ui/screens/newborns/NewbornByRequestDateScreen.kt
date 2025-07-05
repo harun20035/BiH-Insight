@@ -32,10 +32,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Settings
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import androidx.compose.material3.FilterChip
@@ -57,7 +58,8 @@ fun NewbornByRequestDateScreen(
     onNewbornClick: (Int) -> Unit = {},
     onFavoritesClick: () -> Unit = {},
     onDatasetClick: () -> Unit = {},
-    onChartClick: () -> Unit = {}
+    onChartClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val filterText by viewModel.filterText.collectAsState()
@@ -118,7 +120,10 @@ fun NewbornByRequestDateScreen(
                         Icon(Icons.Filled.Star, contentDescription = "Favoriti")
                     }
                     IconButton(onClick = onDatasetClick) {
-                        Icon(Icons.Filled.Settings, contentDescription = "Izbor skupa podataka")
+                        Icon(Icons.Filled.List, contentDescription = "Izbor skupa podataka")
+                    }
+                    IconButton(onClick = onSettingsClick) {
+                        Icon(Icons.Filled.Settings, contentDescription = "Postavke")
                     }
                 }
             )

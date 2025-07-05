@@ -51,6 +51,9 @@ import com.example.bihinsight.ui.navigation.AppNavGraph
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,7 +86,11 @@ class MainActivity : ComponentActivity() {
         val newbornByRequestDateRepository = NewbornByRequestDateRepository(newbornByRequestDateApiService, db.newbornByRequestDateDao())
 
         setContent {
-            BiHInsightTheme {
+            val context = LocalContext.current
+            val prefs = context.getSharedPreferences("bihinsight_prefs", Context.MODE_PRIVATE)
+            var isDarkMode by remember { mutableStateOf(prefs.getBoolean("dark_mode", false)) }
+            
+            BiHInsightTheme(darkTheme = isDarkMode) {
                 Surface {
                     val navController = rememberNavController()
                     val issuedDLCardViewModel: IssuedDLCardViewModel = viewModel(
@@ -99,7 +106,10 @@ class MainActivity : ComponentActivity() {
                         navController = navController,
                         viewModel = issuedDLCardViewModel,
                         personsViewModel = personsByRecordDateViewModel,
-                        newbornsViewModel = newbornByRequestDateViewModel
+                        newbornsViewModel = newbornByRequestDateViewModel,
+                        onThemeChanged = { newTheme ->
+                            isDarkMode = newTheme
+                        }
                     )
                 }
             }

@@ -41,6 +41,7 @@ import com.example.bihinsight.ui.screens.newborns.NewbornByRequestDateViewModel
 import com.example.bihinsight.ui.screens.details.NewbornByRequestDateDetailsScreen
 import com.example.bihinsight.ui.screens.chart.NewbornByRequestDateChartScreen
 import com.example.bihinsight.ui.screens.favorites.NewbornByRequestDateFavoritesScreen
+import com.example.bihinsight.ui.screens.settings.SettingsScreen
 
 @Composable
 fun AppNavGraph(
@@ -48,6 +49,7 @@ fun AppNavGraph(
     viewModel: IssuedDLCardViewModel,
     personsViewModel: PersonsByRecordDateViewModel,
     newbornsViewModel: NewbornByRequestDateViewModel,
+    onThemeChanged: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -95,7 +97,8 @@ fun AppNavGraph(
                         onCardClick = { cardId -> navController.navigate("details/$cardId") },
                         onFavoritesClick = { navController.navigate("favorites") },
                         onDatasetClick = { navController.navigate("dataset_selection") },
-                        onChartClick = { navController.navigate("chart") }
+                        onChartClick = { navController.navigate("chart") },
+                        onSettingsClick = { navController.navigate("settings") }
                     )
                 }
                 "Registrovane osobe" -> {
@@ -104,7 +107,8 @@ fun AppNavGraph(
                         onPersonClick = { personId -> navController.navigate("person_details/$personId") },
                         onFavoritesClick = { navController.navigate("person_favorites") },
                         onDatasetClick = { navController.navigate("dataset_selection") },
-                        onChartClick = { navController.navigate("person_chart") }
+                        onChartClick = { navController.navigate("person_chart") },
+                        onSettingsClick = { navController.navigate("settings") }
                     )
                 }
                 "Novorođene osobe" -> {
@@ -113,7 +117,8 @@ fun AppNavGraph(
                         onNewbornClick = { newbornId -> navController.navigate("newborn_details/$newbornId") },
                         onFavoritesClick = { navController.navigate("newborn_favorites") },
                         onDatasetClick = { navController.navigate("dataset_selection") },
-                        onChartClick = { navController.navigate("newborn_chart") }
+                        onChartClick = { navController.navigate("newborn_chart") },
+                        onSettingsClick = { navController.navigate("settings") }
                     )
                 }
                 else -> {
@@ -122,7 +127,8 @@ fun AppNavGraph(
                         onCardClick = { cardId -> navController.navigate("details/$cardId") },
                         onFavoritesClick = { navController.navigate("favorites") },
                         onDatasetClick = { navController.navigate("dataset_selection") },
-                        onChartClick = { navController.navigate("chart") }
+                        onChartClick = { navController.navigate("chart") },
+                        onSettingsClick = { navController.navigate("settings") }
                     )
                 }
             }
@@ -313,6 +319,14 @@ fun AppNavGraph(
                     }
                 }
             }
+        }
+        composable("settings") {
+            val context = LocalContext.current
+            val prefs = context.getSharedPreferences("bihinsight_prefs", Context.MODE_PRIVATE)
+            SettingsScreen(
+                onBack = { navController.popBackStack() },
+                onThemeChanged = onThemeChanged
+            )
         }
     }
 } 
