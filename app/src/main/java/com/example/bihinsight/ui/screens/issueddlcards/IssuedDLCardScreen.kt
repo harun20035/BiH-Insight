@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Info
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import androidx.compose.material3.FilterChip
@@ -53,7 +54,8 @@ fun IssuedDLCardScreen(
     viewModel: IssuedDLCardViewModel,
     onCardClick: (Int) -> Unit = {},
     onFavoritesClick: () -> Unit = {},
-    onDatasetClick: () -> Unit = {}
+    onDatasetClick: () -> Unit = {},
+    onChartClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val filterText by viewModel.filterText.collectAsState()
@@ -91,6 +93,9 @@ fun IssuedDLCardScreen(
                             if (filtersVisible.value) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
                             contentDescription = if (filtersVisible.value) "Sakrij filtere" else "Prikaži filtere"
                         )
+                    }
+                    IconButton(onClick = onChartClick) {
+                        Icon(Icons.Filled.Info, contentDescription = "Vizualizacija")
                     }
                     IconButton(onClick = onFavoritesClick) {
                         Icon(Icons.Filled.Star, contentDescription = "Favoriti")

@@ -67,4 +67,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("com.google.accompanist:accompanist-swiperefresh:0.33.2-alpha")
+    
+    // MPAndroidChart for visualization
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 }

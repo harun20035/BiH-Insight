@@ -25,6 +25,11 @@ import com.example.bihinsight.ui.screens.onboarding.OnboardingScreen
 import android.content.Context
 import android.content.SharedPreferences
 import com.example.bihinsight.ui.screens.home.DatasetSelectionScreen
+import com.example.bihinsight.ui.screens.chart.ChartScreen
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.Alignment
 
 @Composable
 fun AppNavGraph(
@@ -73,7 +78,8 @@ fun AppNavGraph(
                 viewModel,
                 onCardClick = { cardId -> navController.navigate("details/$cardId") },
                 onFavoritesClick = { navController.navigate("favorites") },
-                onDatasetClick = { navController.navigate("dataset_selection") }
+                onDatasetClick = { navController.navigate("dataset_selection") },
+                onChartClick = { navController.navigate("chart") }
             )
         }
         composable("dataset_selection") {
@@ -123,6 +129,22 @@ fun AppNavGraph(
             FavoritesScreen(favorites = favorites, onCardClick = { cardId ->
                 navController.navigate("details/$cardId")
             })
+        }
+        composable("chart") {
+            val cards by viewModel.uiState.collectAsState()
+            when (cards) {
+                is IssuedDLCardUiState.Success -> {
+                    ChartScreen(
+                        cards = (cards as IssuedDLCardUiState.Success).cards,
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+                else -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+            }
         }
     }
 } 
