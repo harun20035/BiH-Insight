@@ -32,11 +32,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import androidx.compose.material3.FilterChip
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.Button
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,6 +66,7 @@ fun IssuedDLCardScreen(
     )
     val expanded = remember { mutableStateOf(false) }
     val sortExpanded = remember { mutableStateOf(false) }
+    val filtersVisible = remember { mutableStateOf(false) }
 
     // Prikupi sve godine iz trenutnog state-a (za dropdown)
     val allYears = (uiState as? IssuedDLCardUiState.Success)?.cards?.mapNotNull { it.year }?.distinct()?.sorted() ?: emptyList()
@@ -76,6 +86,12 @@ fun IssuedDLCardScreen(
             TopAppBar(
                 title = { Text("Izdate vozačke dozvole") },
                 actions = {
+                    IconButton(onClick = { filtersVisible.value = !filtersVisible.value }) {
+                        Icon(
+                            if (filtersVisible.value) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                            contentDescription = if (filtersVisible.value) "Sakrij filtere" else "Prikaži filtere"
+                        )
+                    }
                     IconButton(onClick = onFavoritesClick) {
                         Icon(Icons.Filled.Star, contentDescription = "Favoriti")
                     }
@@ -85,114 +101,137 @@ fun IssuedDLCardScreen(
                 }
             )
             
-            // ChipGroup za filtriranje po entitetima
-            if (allEntities.isNotEmpty()) {
-                LazyRow(
+            // Collapsible Filter Panel
+            AnimatedVisibility(
+                visible = filtersVisible.value,
+                enter = slideInVertically(
+                    animationSpec = tween(300),
+                    initialOffsetY = { -it }
+                ) + fadeIn(animationSpec = tween(300)),
+                exit = slideOutVertically(
+                    animationSpec = tween(300),
+                    targetOffsetY = { -it }
+                ) + fadeOut(animationSpec = tween(300))
+            ) {
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        .padding(16.dp)
                 ) {
-                    item {
-                        FilterChip(
-                            selected = selectedEntity.value == null,
-                            onClick = { 
-                                selectedEntity.value = null
-                                viewModel.setEntityFilter(null)
-                            },
-                            label = { Text("Svi entiteti") }
-                        )
+                    // ChipGroup za filtriranje po entitetima
+                    if (allEntities.isNotEmpty()) {
+                        LazyRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            item {
+                                FilterChip(
+                                    selected = selectedEntity.value == null,
+                                    onClick = { 
+                                        selectedEntity.value = null
+                                        viewModel.setEntityFilter(null)
+                                    },
+                                    label = { Text("Svi entiteti") }
+                                )
+                            }
+                            items(allEntities) { entity ->
+                                FilterChip(
+                                    selected = selectedEntity.value == entity,
+                                    onClick = { 
+                                        selectedEntity.value = entity
+                                        viewModel.setEntityFilter(entity)
+                                    },
+                                    label = { Text(entity) }
+                                )
+                            }
+                        }
                     }
-                    items(allEntities) { entity ->
-                        FilterChip(
-                            selected = selectedEntity.value == entity,
-                            onClick = { 
-                                selectedEntity.value = entity
-                                viewModel.setEntityFilter(entity)
-                            },
-                            label = { Text(entity) }
+                    
+                    ExposedDropdownMenuBox(
+                        expanded = sortExpanded.value,
+                        onExpandedChange = { sortExpanded.value = !sortExpanded.value },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = sortOptions.first { it.first == sortOption }.second,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Sortiraj po") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = sortExpanded.value) },
+                            modifier = Modifier.menuAnchor().fillMaxWidth(),
+                            colors = OutlinedTextFieldDefaults.colors()
                         )
+                        DropdownMenu(
+                            expanded = sortExpanded.value,
+                            onDismissRequest = { sortExpanded.value = false }
+                        ) {
+                            sortOptions.forEach { (option, label) ->
+                                DropdownMenuItem(
+                                    text = { Text(label) },
+                                    onClick = {
+                                        viewModel.setSortOption(option)
+                                        sortExpanded.value = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    
+                    OutlinedTextField(
+                        value = filterText,
+                        onValueChange = { viewModel.setFilterText(it) },
+                        label = { Text("Pretraži po općini") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp)
+                    )
+                    
+                    ExposedDropdownMenuBox(
+                        expanded = expanded.value,
+                        onExpandedChange = { expanded.value = !expanded.value },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = yearFilter?.toString() ?: "",
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Godina") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded.value) },
+                            modifier = Modifier.menuAnchor().fillMaxWidth(),
+                            colors = OutlinedTextFieldDefaults.colors()
+                        )
+                        DropdownMenu(
+                            expanded = expanded.value,
+                            onDismissRequest = { expanded.value = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Sve godine") },
+                                onClick = {
+                                    viewModel.setYearFilter(null)
+                                    expanded.value = false
+                                }
+                            )
+                            allYears.forEach { year ->
+                                DropdownMenuItem(
+                                    text = { Text(year.toString()) },
+                                    onClick = {
+                                        viewModel.setYearFilter(year)
+                                        expanded.value = false
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
             }
             
-            ExposedDropdownMenuBox(
-                expanded = sortExpanded.value,
-                onExpandedChange = { sortExpanded.value = !sortExpanded.value },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                OutlinedTextField(
-                    value = sortOptions.first { it.first == sortOption }.second,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Sortiraj po") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = sortExpanded.value) },
-                    modifier = Modifier.menuAnchor().fillMaxWidth(),
-                    colors = OutlinedTextFieldDefaults.colors()
-                )
-                DropdownMenu(
-                    expanded = sortExpanded.value,
-                    onDismissRequest = { sortExpanded.value = false }
-                ) {
-                    sortOptions.forEach { (option, label) ->
-                        DropdownMenuItem(
-                            text = { Text(label) },
-                            onClick = {
-                                viewModel.setSortOption(option)
-                                sortExpanded.value = false
-                            }
-                        )
-                    }
-                }
-            }
-            OutlinedTextField(
-                value = filterText,
-                onValueChange = { viewModel.setFilterText(it) },
-                label = { Text("Pretraži po općini") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            )
-            ExposedDropdownMenuBox(
-                expanded = expanded.value,
-                onExpandedChange = { expanded.value = !expanded.value },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                OutlinedTextField(
-                    value = yearFilter?.toString() ?: "",
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Godina") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded.value) },
-                    modifier = Modifier.menuAnchor().fillMaxWidth(),
-                    colors = OutlinedTextFieldDefaults.colors()
-                )
-                DropdownMenu(
-                    expanded = expanded.value,
-                    onDismissRequest = { expanded.value = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Sve godine") },
-                        onClick = {
-                            viewModel.setYearFilter(null)
-                            expanded.value = false
-                        }
-                    )
-                    allYears.forEach { year ->
-                        DropdownMenuItem(
-                            text = { Text(year.toString()) },
-                            onClick = {
-                                viewModel.setYearFilter(year)
-                                expanded.value = false
-                            }
-                        )
-                    }
-                }
-            }
+            // Lista podataka
             Box(modifier = Modifier.weight(1f)) {
                 when (uiState) {
                     is IssuedDLCardUiState.Loading -> {

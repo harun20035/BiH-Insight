@@ -1,6 +1,7 @@
 package com.example.bihinsight.ui.screens.issueddlcards
 
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bihinsight.data.local.IssuedDLCardEntity
@@ -18,6 +19,7 @@ sealed class IssuedDLCardUiState {
 }
 
 class IssuedDLCardViewModel(
+    private val savedStateHandle: SavedStateHandle,
     private val repository: IssuedDLCardRepository,
     private val token: String? = null,
     private val languageId: Int = 1
@@ -25,18 +27,13 @@ class IssuedDLCardViewModel(
     private val _uiState = MutableStateFlow<IssuedDLCardUiState>(IssuedDLCardUiState.Loading)
     val uiState: StateFlow<IssuedDLCardUiState> = _uiState.asStateFlow()
 
-    private val _filterText = MutableStateFlow("")
-    val filterText: StateFlow<String> = _filterText.asStateFlow()
-
-    private val _yearFilter = MutableStateFlow<Int?>(null)
-    val yearFilter: StateFlow<Int?> = _yearFilter.asStateFlow()
-
-    private val _entityFilter = MutableStateFlow<String?>(null)
-    val entityFilter: StateFlow<String?> = _entityFilter.asStateFlow()
+    // Spašavanje stanja sa SavedStateHandle
+    val filterText: StateFlow<String> = savedStateHandle.getStateFlow("filter_text", "")
+    val yearFilter: StateFlow<Int?> = savedStateHandle.getStateFlow("year_filter", null as Int?)
+    val entityFilter: StateFlow<String?> = savedStateHandle.getStateFlow("entity_filter", null as String?)
 
     enum class SortOption { MUNICIPALITY, YEAR_DESC, TOTAL_DESC }
-    private val _sortOption = MutableStateFlow(SortOption.MUNICIPALITY)
-    val sortOption: StateFlow<SortOption> = _sortOption.asStateFlow()
+    val sortOption: StateFlow<SortOption> = savedStateHandle.getStateFlow("sort_option", SortOption.MUNICIPALITY)
 
     private val _detailCard = MutableStateFlow<IssuedDLCardEntity?>(null)
     val detailCard: StateFlow<IssuedDLCardEntity?> = _detailCard.asStateFlow()
@@ -59,17 +56,17 @@ class IssuedDLCardViewModel(
     }
 
     fun setYearFilter(year: Int?) {
-        _yearFilter.value = year
+        savedStateHandle["year_filter"] = year
         filterCombined()
     }
 
     fun setEntityFilter(entity: String?) {
-        _entityFilter.value = entity
+        savedStateHandle["entity_filter"] = entity
         filterCombined()
     }
 
     fun setSortOption(option: SortOption) {
-        _sortOption.value = option
+        savedStateHandle["sort_option"] = option
         filterCombined()
     }
 
@@ -78,18 +75,18 @@ class IssuedDLCardViewModel(
             _uiState.value = IssuedDLCardUiState.Loading
             try {
                 val data = repository.filterCombined(
-                    municipality = _filterText.value.takeIf { it.isNotBlank() },
-                    year = _yearFilter.value
+                    municipality = filterText.value.takeIf { it.isNotBlank() },
+                    year = yearFilter.value
                 )
                 
                 // Dodatno filtriranje po entitetu
-                val entityFiltered = if (_entityFilter.value != null) {
-                    data.filter { it.entity == _entityFilter.value }
+                val entityFiltered = if (entityFilter.value != null) {
+                    data.filter { it.entity == entityFilter.value }
                 } else {
                     data
                 }
                 
-                val sorted = when (_sortOption.value) {
+                val sorted = when (sortOption.value) {
                     SortOption.MUNICIPALITY -> entityFiltered.sortedBy { it.municipality ?: "" }
                     SortOption.YEAR_DESC -> entityFiltered.sortedByDescending { it.year ?: 0 }
                     SortOption.TOTAL_DESC -> entityFiltered.sortedByDescending { it.total ?: 0 }
@@ -102,7 +99,7 @@ class IssuedDLCardViewModel(
     }
 
     fun setFilterText(text: String) {
-        _filterText.value = text
+        savedStateHandle["filter_text"] = text
         filterCombined()
     }
 

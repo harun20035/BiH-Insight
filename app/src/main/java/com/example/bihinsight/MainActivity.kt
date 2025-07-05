@@ -31,6 +31,7 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.bihinsight.ui.screens.details.IssuedDLCardDetailsScreen
 import com.example.bihinsight.ui.navigation.AppNavGraph
+import androidx.lifecycle.SavedStateHandle
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,7 +84,12 @@ class IssuedDLCardViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(IssuedDLCardViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return IssuedDLCardViewModel(repository, token, languageId) as T
+            return IssuedDLCardViewModel(
+                savedStateHandle = SavedStateHandle(),
+                repository = repository,
+                token = token,
+                languageId = languageId
+            ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
