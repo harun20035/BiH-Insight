@@ -30,11 +30,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.Alignment
+import com.example.bihinsight.ui.screens.personsbyrecorddate.PersonsByRecordDateScreen
+import com.example.bihinsight.ui.screens.personsbyrecorddate.PersonsByRecordDateViewModel
+import com.example.bihinsight.ui.screens.details.PersonsByRecordDateDetailsScreen
+import com.example.bihinsight.ui.screens.chart.PersonsByRecordDateChartScreen
+import com.example.bihinsight.ui.screens.favorites.PersonsByRecordDateFavoritesScreen
+import com.example.bihinsight.ui.screens.personsbyrecorddate.PersonsByRecordDateUiState
 
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
     viewModel: IssuedDLCardViewModel,
+    personsViewModel: PersonsByRecordDateViewModel,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -74,13 +81,36 @@ fun AppNavGraph(
             val context = LocalContext.current
             val prefs = context.getSharedPreferences("bihinsight_prefs", Context.MODE_PRIVATE)
             val selectedDataset = prefs.getString("selected_dataset", "Izdate vozačke dozvole") ?: "Izdate vozačke dozvole"
-            IssuedDLCardScreen(
-                viewModel,
-                onCardClick = { cardId -> navController.navigate("details/$cardId") },
-                onFavoritesClick = { navController.navigate("favorites") },
-                onDatasetClick = { navController.navigate("dataset_selection") },
-                onChartClick = { navController.navigate("chart") }
-            )
+            
+            when (selectedDataset) {
+                "Izdate vozačke dozvole" -> {
+                    IssuedDLCardScreen(
+                        viewModel,
+                        onCardClick = { cardId -> navController.navigate("details/$cardId") },
+                        onFavoritesClick = { navController.navigate("favorites") },
+                        onDatasetClick = { navController.navigate("dataset_selection") },
+                        onChartClick = { navController.navigate("chart") }
+                    )
+                }
+                "Registrovane osobe" -> {
+                    PersonsByRecordDateScreen(
+                        viewModel = personsViewModel,
+                        onPersonClick = { personId -> navController.navigate("person_details/$personId") },
+                        onFavoritesClick = { navController.navigate("person_favorites") },
+                        onDatasetClick = { navController.navigate("dataset_selection") },
+                        onChartClick = { navController.navigate("person_chart") }
+                    )
+                }
+                else -> {
+                    IssuedDLCardScreen(
+                        viewModel,
+                        onCardClick = { cardId -> navController.navigate("details/$cardId") },
+                        onFavoritesClick = { navController.navigate("favorites") },
+                        onDatasetClick = { navController.navigate("dataset_selection") },
+                        onChartClick = { navController.navigate("chart") }
+                    )
+                }
+            }
         }
         composable("dataset_selection") {
             val context = LocalContext.current
@@ -140,6 +170,66 @@ fun AppNavGraph(
                 is IssuedDLCardUiState.Success -> {
                     ChartScreen(
                         cards = (cards as IssuedDLCardUiState.Success).cards,
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+                else -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+            }
+        }
+        
+        // PersonsByRecordDate navigation
+        composable(
+            route = "person_details/{personId}",
+            arguments = listOf(navArgument("personId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val personId = backStackEntry.arguments?.getInt("personId")
+            if (personId != null) {
+                val context = LocalContext.current
+                val person by personsViewModel.observeDetailPerson(personId).collectAsState(initial = null)
+                person?.let {
+                    PersonsByRecordDateDetailsScreen(
+                        person = it,
+                        onBack = { navController.popBackStack() },
+                        onToggleFavorite = { isFav ->
+                            if (isFav) personsViewModel.addToFavorites(it.id) else personsViewModel.removeFromFavorites(it.id)
+                        },
+                        onShare = { shareText ->
+                            val sendIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, shareText)
+                                type = "text/plain"
+                            }
+                            val shareIntent = Intent.createChooser(sendIntent, null)
+                            context.startActivity(shareIntent)
+                        }
+                    )
+                } ?: Text("Podatak nije pronađen.")
+            } else {
+                Text("Podatak nije pronađen.")
+            }
+        }
+        
+        composable("person_favorites") {
+            val favorites by personsViewModel.observeFavorites().collectAsState(initial = emptyList())
+            PersonsByRecordDateFavoritesScreen(
+                favorites = favorites, 
+                onPersonClick = { personId ->
+                    navController.navigate("person_details/$personId")
+                },
+                onBack = { navController.popBackStack() }
+            )
+        }
+        
+        composable("person_chart") {
+            val persons by personsViewModel.uiState.collectAsState()
+            when (persons) {
+                is PersonsByRecordDateUiState.Success -> {
+                    PersonsByRecordDateChartScreen(
+                        persons = (persons as PersonsByRecordDateUiState.Success).persons,
                         onBack = { navController.popBackStack() }
                     )
                 }

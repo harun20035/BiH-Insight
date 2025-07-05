@@ -14,7 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.bihinsight.data.local.IssuedDLCardEntity
+import com.example.bihinsight.data.local.PersonsByRecordDateEntity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.Alignment
@@ -28,16 +28,16 @@ import androidx.compose.material3.TopAppBarDefaults
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FavoritesScreen(
-    favorites: List<IssuedDLCardEntity>, 
-    onCardClick: (Int) -> Unit,
+fun PersonsByRecordDateFavoritesScreen(
+    favorites: List<PersonsByRecordDateEntity>, 
+    onPersonClick: (Int) -> Unit,
     onBack: () -> Unit = {}
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
             title = { 
                 Text(
-                    text = "Favoriti - Dozvole",
+                    text = "Favoriti - Osobe",
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onPrimary
                 )
@@ -61,7 +61,7 @@ fun FavoritesScreen(
                 }
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    items(favorites) { card ->
+                    items(favorites) { person ->
                         Card(
                             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                             colors = CardDefaults.cardColors(
@@ -71,21 +71,25 @@ fun FavoritesScreen(
                                 .fillMaxSize()
                                 .padding(4.dp)
                                 .then(Modifier)
-                                .clickable { onCardClick(card.id) }
+                                .clickable { onPersonClick(person.id) }
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Text(
-                                    text = "Općina: ${card.municipality ?: "Nepoznato"}",
+                                    text = "Općina: ${person.municipality ?: "Nepoznato"}",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary
                                 )
                                 Text(
-                                    text = "Godina: ${card.year ?: "-"}",
+                                    text = "Godina: ${person.year ?: "-"}",
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                                 Text(
-                                    text = "Ukupno: ${card.total ?: "-"}",
+                                    text = "Ukupno: ${person.total ?: "-"}",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Text(
+                                    text = "Sa prebivalištem: ${person.withResidenceTotal ?: "-"}",
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }

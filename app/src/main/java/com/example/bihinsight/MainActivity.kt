@@ -20,10 +20,13 @@ import com.example.bihinsight.data.local.AppDatabase
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import com.example.bihinsight.data.remote.IssuedDLCardApiService
+import com.example.bihinsight.data.remote.PersonsByRecordDateApiService
 import com.example.bihinsight.data.repository.IssuedDLCardRepository
+import com.example.bihinsight.data.repository.PersonsByRecordDateRepository
 import com.example.bihinsight.ui.screens.issueddlcards.IssuedDLCardScreen
 import com.example.bihinsight.ui.screens.issueddlcards.IssuedDLCardUiState
 import com.example.bihinsight.ui.screens.issueddlcards.IssuedDLCardViewModel
+import com.example.bihinsight.ui.screens.personsbyrecorddate.PersonsByRecordDateViewModel
 import com.example.bihinsight.ui.screens.details.IssuedDLCardDetailsScreen
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -63,25 +66,31 @@ class MainActivity : ComponentActivity() {
             .baseUrl("https://odp.iddeea.gov.ba:8096/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-        val apiService = retrofit.create(IssuedDLCardApiService::class.java)
+        val issuedDLCardApiService = retrofit.create(IssuedDLCardApiService::class.java)
+        val personsByRecordDateApiService = retrofit.create(PersonsByRecordDateApiService::class.java)
 
         // Token za API - čita se iz BuildConfig
         val token: String? = if (BuildConfig.API_TOKEN.isNotEmpty()) BuildConfig.API_TOKEN else null
         val languageId = 1
 
         // Inicijalizacija repository-ja
-        val repository = IssuedDLCardRepository(apiService, db.issuedDLCardDao())
+        val issuedDLCardRepository = IssuedDLCardRepository(issuedDLCardApiService, db.issuedDLCardDao())
+        val personsByRecordDateRepository = PersonsByRecordDateRepository(personsByRecordDateApiService, db.personsByRecordDateDao())
 
         setContent {
             BiHInsightTheme {
                 Surface {
                     val navController = rememberNavController()
-                    val viewModel: IssuedDLCardViewModel = viewModel(
-                        factory = IssuedDLCardViewModelFactory(repository, token, languageId)
+                    val issuedDLCardViewModel: IssuedDLCardViewModel = viewModel(
+                        factory = IssuedDLCardViewModelFactory(issuedDLCardRepository, token, languageId)
+                    )
+                    val personsByRecordDateViewModel: PersonsByRecordDateViewModel = viewModel(
+                        factory = PersonsByRecordDateViewModelFactory(personsByRecordDateRepository, token, languageId)
                     )
                     AppNavGraph(
                         navController = navController,
-                        viewModel = viewModel
+                        viewModel = issuedDLCardViewModel,
+                        personsViewModel = personsByRecordDateViewModel
                     )
                 }
             }
@@ -128,6 +137,25 @@ class IssuedDLCardViewModelFactory(
         if (modelClass.isAssignableFrom(IssuedDLCardViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
             return IssuedDLCardViewModel(
+                savedStateHandle = SavedStateHandle(),
+                repository = repository,
+                token = token,
+                languageId = languageId
+            ) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
+class PersonsByRecordDateViewModelFactory(
+    private val repository: PersonsByRecordDateRepository,
+    private val token: String?,
+    private val languageId: Int
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(PersonsByRecordDateViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return PersonsByRecordDateViewModel(
                 savedStateHandle = SavedStateHandle(),
                 repository = repository,
                 token = token,
