@@ -36,12 +36,18 @@ import com.example.bihinsight.ui.screens.details.PersonsByRecordDateDetailsScree
 import com.example.bihinsight.ui.screens.chart.PersonsByRecordDateChartScreen
 import com.example.bihinsight.ui.screens.favorites.PersonsByRecordDateFavoritesScreen
 import com.example.bihinsight.ui.screens.personsbyrecorddate.PersonsByRecordDateUiState
+import com.example.bihinsight.ui.screens.newborns.NewbornByRequestDateScreen
+import com.example.bihinsight.ui.screens.newborns.NewbornByRequestDateViewModel
+import com.example.bihinsight.ui.screens.details.NewbornByRequestDateDetailsScreen
+import com.example.bihinsight.ui.screens.chart.NewbornByRequestDateChartScreen
+import com.example.bihinsight.ui.screens.favorites.NewbornByRequestDateFavoritesScreen
 
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
     viewModel: IssuedDLCardViewModel,
     personsViewModel: PersonsByRecordDateViewModel,
+    newbornsViewModel: NewbornByRequestDateViewModel,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -99,6 +105,15 @@ fun AppNavGraph(
                         onFavoritesClick = { navController.navigate("person_favorites") },
                         onDatasetClick = { navController.navigate("dataset_selection") },
                         onChartClick = { navController.navigate("person_chart") }
+                    )
+                }
+                "Novorođene osobe" -> {
+                    NewbornByRequestDateScreen(
+                        viewModel = newbornsViewModel,
+                        onNewbornClick = { newbornId -> navController.navigate("newborn_details/$newbornId") },
+                        onFavoritesClick = { navController.navigate("newborn_favorites") },
+                        onDatasetClick = { navController.navigate("dataset_selection") },
+                        onChartClick = { navController.navigate("newborn_chart") }
                     )
                 }
                 else -> {
@@ -230,6 +245,65 @@ fun AppNavGraph(
                 is PersonsByRecordDateUiState.Success -> {
                     PersonsByRecordDateChartScreen(
                         persons = (persons as PersonsByRecordDateUiState.Success).persons,
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+                else -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+            }
+        }
+        
+        // NewbornByRequestDate navigation
+        composable(
+            route = "newborn_details/{newbornId}",
+            arguments = listOf(navArgument("newbornId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val newbornId = backStackEntry.arguments?.getInt("newbornId")
+            if (newbornId != null) {
+                val context = LocalContext.current
+                val newborn by newbornsViewModel.observeDetailNewborn(newbornId).collectAsState(initial = null)
+                newborn?.let {
+                    NewbornByRequestDateDetailsScreen(
+                        newborn = it,
+                        onBack = { navController.popBackStack() },
+                        onToggleFavorite = { isFav ->
+                            if (isFav) newbornsViewModel.addToFavorites(it.id) else newbornsViewModel.removeFromFavorites(it.id)
+                        },
+                        onShare = { shareText ->
+                            val sendIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, shareText)
+                                type = "text/plain"
+                            }
+                            val shareIntent = Intent.createChooser(sendIntent, null)
+                            context.startActivity(shareIntent)
+                        }
+                    )
+                } ?: Text("Podatak nije pronađen.")
+            } else {
+                Text("Podatak nije pronađen.")
+            }
+        }
+        composable("newborn_favorites") {
+            val favorites by newbornsViewModel.observeFavorites().collectAsState(initial = emptyList())
+            NewbornByRequestDateFavoritesScreen(
+                favorites = favorites,
+                onNewbornClick = { newbornId -> navController.navigate("newborn_details/$newbornId") },
+                onBack = { navController.popBackStack() },
+                onToggleFavorite = { id, isFav ->
+                    if (isFav) newbornsViewModel.addToFavorites(id) else newbornsViewModel.removeFromFavorites(id)
+                }
+            )
+        }
+        composable("newborn_chart") {
+            val newborns by newbornsViewModel.uiState.collectAsState()
+            when (newborns) {
+                is com.example.bihinsight.ui.screens.newborns.NewbornByRequestDateUiState.Success -> {
+                    NewbornByRequestDateChartScreen(
+                        newborns = (newborns as com.example.bihinsight.ui.screens.newborns.NewbornByRequestDateUiState.Success).newborns,
                         onBack = { navController.popBackStack() }
                     )
                 }

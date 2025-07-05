@@ -21,12 +21,15 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import com.example.bihinsight.data.remote.IssuedDLCardApiService
 import com.example.bihinsight.data.remote.PersonsByRecordDateApiService
+import com.example.bihinsight.data.remote.NewbornByRequestDateApiService
 import com.example.bihinsight.data.repository.IssuedDLCardRepository
 import com.example.bihinsight.data.repository.PersonsByRecordDateRepository
+import com.example.bihinsight.data.repository.NewbornByRequestDateRepository
 import com.example.bihinsight.ui.screens.issueddlcards.IssuedDLCardScreen
 import com.example.bihinsight.ui.screens.issueddlcards.IssuedDLCardUiState
 import com.example.bihinsight.ui.screens.issueddlcards.IssuedDLCardViewModel
 import com.example.bihinsight.ui.screens.personsbyrecorddate.PersonsByRecordDateViewModel
+import com.example.bihinsight.ui.screens.newborns.NewbornByRequestDateViewModel
 import com.example.bihinsight.ui.screens.details.IssuedDLCardDetailsScreen
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -68,6 +71,7 @@ class MainActivity : ComponentActivity() {
             .build()
         val issuedDLCardApiService = retrofit.create(IssuedDLCardApiService::class.java)
         val personsByRecordDateApiService = retrofit.create(PersonsByRecordDateApiService::class.java)
+        val newbornByRequestDateApiService = retrofit.create(NewbornByRequestDateApiService::class.java)
 
         // Token za API - čita se iz BuildConfig
         val token: String? = if (BuildConfig.API_TOKEN.isNotEmpty()) BuildConfig.API_TOKEN else null
@@ -76,6 +80,7 @@ class MainActivity : ComponentActivity() {
         // Inicijalizacija repository-ja
         val issuedDLCardRepository = IssuedDLCardRepository(issuedDLCardApiService, db.issuedDLCardDao())
         val personsByRecordDateRepository = PersonsByRecordDateRepository(personsByRecordDateApiService, db.personsByRecordDateDao())
+        val newbornByRequestDateRepository = NewbornByRequestDateRepository(newbornByRequestDateApiService, db.newbornByRequestDateDao())
 
         setContent {
             BiHInsightTheme {
@@ -87,10 +92,14 @@ class MainActivity : ComponentActivity() {
                     val personsByRecordDateViewModel: PersonsByRecordDateViewModel = viewModel(
                         factory = PersonsByRecordDateViewModelFactory(personsByRecordDateRepository, token, languageId)
                     )
+                    val newbornByRequestDateViewModel: NewbornByRequestDateViewModel = viewModel(
+                        factory = NewbornByRequestDateViewModelFactory(newbornByRequestDateRepository, token, languageId)
+                    )
                     AppNavGraph(
                         navController = navController,
                         viewModel = issuedDLCardViewModel,
-                        personsViewModel = personsByRecordDateViewModel
+                        personsViewModel = personsByRecordDateViewModel,
+                        newbornsViewModel = newbornByRequestDateViewModel
                     )
                 }
             }
@@ -156,6 +165,25 @@ class PersonsByRecordDateViewModelFactory(
         if (modelClass.isAssignableFrom(PersonsByRecordDateViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
             return PersonsByRecordDateViewModel(
+                savedStateHandle = SavedStateHandle(),
+                repository = repository,
+                token = token,
+                languageId = languageId
+            ) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
+class NewbornByRequestDateViewModelFactory(
+    private val repository: NewbornByRequestDateRepository,
+    private val token: String?,
+    private val languageId: Int
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(NewbornByRequestDateViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return NewbornByRequestDateViewModel(
                 savedStateHandle = SavedStateHandle(),
                 repository = repository,
                 token = token,

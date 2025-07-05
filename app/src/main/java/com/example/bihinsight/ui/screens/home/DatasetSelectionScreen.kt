@@ -16,7 +16,7 @@ fun DatasetSelectionScreen(
     onDatasetSelected: (String) -> Unit,
     onConfirm: () -> Unit
 ) {
-    val datasets = listOf("Izdate vozačke dozvole", "Registrovane osobe")
+    val datasets = listOf("Izdate vozačke dozvole", "Registrovane osobe", "Novorođene osobe")
     var currentSelection by remember { mutableStateOf(selectedDataset) }
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
