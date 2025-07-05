@@ -126,9 +126,13 @@ fun AppNavGraph(
         }
         composable("favorites") {
             val favorites by viewModel.observeFavorites().collectAsState(initial = emptyList())
-            FavoritesScreen(favorites = favorites, onCardClick = { cardId ->
-                navController.navigate("details/$cardId")
-            })
+            FavoritesScreen(
+                favorites = favorites, 
+                onCardClick = { cardId ->
+                    navController.navigate("details/$cardId")
+                },
+                onBack = { navController.popBackStack() }
+            )
         }
         composable("chart") {
             val cards by viewModel.uiState.collectAsState()
