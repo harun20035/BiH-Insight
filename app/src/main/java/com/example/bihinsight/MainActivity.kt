@@ -1,5 +1,6 @@
 package com.example.bihinsight
 
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,17 +22,29 @@ import retrofit2.converter.gson.GsonConverterFactory
 import com.example.bihinsight.data.remote.IssuedDLCardApiService
 import com.example.bihinsight.data.repository.IssuedDLCardRepository
 import com.example.bihinsight.ui.screens.issueddlcards.IssuedDLCardScreen
+import com.example.bihinsight.ui.screens.issueddlcards.IssuedDLCardUiState
 import com.example.bihinsight.ui.screens.issueddlcards.IssuedDLCardViewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import com.example.bihinsight.ui.screens.details.IssuedDLCardDetailsScreen
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
+import android.content.Intent
+import com.example.bihinsight.ui.screens.splash.SplashScreen
+import androidx.compose.runtime.LaunchedEffect
+import kotlinx.coroutines.delay
+import com.example.bihinsight.ui.screens.onboarding.OnboardingScreen
+import android.content.Context
+import android.content.SharedPreferences
+import com.example.bihinsight.ui.screens.home.DatasetSelectionScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import com.example.bihinsight.ui.screens.details.IssuedDLCardDetailsScreen
 import com.example.bihinsight.ui.navigation.AppNavGraph
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,6 +86,36 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        
+        // Log konfiguracijske promjene
+        val orientation = when (newConfig.orientation) {
+            Configuration.ORIENTATION_LANDSCAPE -> "Landscape"
+            Configuration.ORIENTATION_PORTRAIT -> "Portrait"
+            else -> "Unknown"
+        }
+        
+        val screenSize = when (newConfig.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK) {
+            Configuration.SCREENLAYOUT_SIZE_SMALL -> "Small"
+            Configuration.SCREENLAYOUT_SIZE_NORMAL -> "Normal"
+            Configuration.SCREENLAYOUT_SIZE_LARGE -> "Large"
+            Configuration.SCREENLAYOUT_SIZE_XLARGE -> "XLarge"
+            else -> "Unknown"
+        }
+        
+        val uiMode = when (newConfig.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
+            Configuration.UI_MODE_NIGHT_NO -> "Light Theme"
+            Configuration.UI_MODE_NIGHT_YES -> "Dark Theme"
+            else -> "Unknown"
+        }
+        
+        android.util.Log.d("ConfigChange", "Orientation: $orientation, Screen: $screenSize, Theme: $uiMode")
+        
+        // Ovdje možete dodati dodatnu logiku za obradu promjena
+        // Na primjer, ažuriranje UI-a, ponovno učitavanje podataka, itd.
     }
 }
 

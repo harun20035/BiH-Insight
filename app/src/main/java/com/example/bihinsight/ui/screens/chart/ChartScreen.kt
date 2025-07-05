@@ -21,6 +21,7 @@ import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.PercentFormatter
 import com.github.mikephil.charting.utils.ColorTemplate
+import androidx.compose.material3.TopAppBarDefaults
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,7 +33,18 @@ fun ChartScreen(
     
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
-            title = { Text("Vizualizacija podataka") },
+            title = { 
+                Text(
+                    text = "Vizualizacija podataka",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+            ),
             navigationIcon = {
                 IconButton(onClick = onBack) {
                     Icon(
