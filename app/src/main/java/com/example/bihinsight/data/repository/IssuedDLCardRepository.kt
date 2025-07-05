@@ -49,6 +49,7 @@ class IssuedDLCardRepository(
 
 // Mapiranje iz IssuedDLCard (API model) u IssuedDLCardEntity (baza)
 fun IssuedDLCard.toEntity(): IssuedDLCardEntity = IssuedDLCardEntity(
+    id = this.id ?: 0,
     entity = this.entity,
     canton = this.canton,
     municipality = this.municipality,

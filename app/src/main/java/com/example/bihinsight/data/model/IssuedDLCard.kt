@@ -1,6 +1,7 @@
 package com.example.bihinsight.data.model
 
 data class IssuedDLCard(
+    val id: Int? = null,
     val entity: String,
     val canton: String?,
     val municipality: String?,

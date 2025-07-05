@@ -65,8 +65,8 @@ class MainActivity : ComponentActivity() {
             .build()
         val apiService = retrofit.create(IssuedDLCardApiService::class.java)
 
-        // Token za API (ako je potreban)
-        val token: String? = "Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyMjE3IiwibmJmIjoxNzUxNjQxOTExLCJleHAiOjE3NTE3MjgzMTEsImlhdCI6MTc1MTY0MTkxMX0.IFsPveqnb6X_E8qVyaVI-5bTK_9l-ZPTm24UUV31MB5jgRm2Uur3ZxLeor2jIqJh9xcyzk2e3BaZ_SIAKsoZ-Q"
+        // Token za API - čita se iz BuildConfig
+        val token: String? = if (BuildConfig.API_TOKEN.isNotEmpty()) BuildConfig.API_TOKEN else null
         val languageId = 1
 
         // Inicijalizacija repository-ja

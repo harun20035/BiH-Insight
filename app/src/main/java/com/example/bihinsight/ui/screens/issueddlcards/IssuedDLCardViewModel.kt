@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.update
+import retrofit2.HttpException
 
 sealed class IssuedDLCardUiState {
     object Loading : IssuedDLCardUiState()
@@ -31,6 +32,7 @@ class IssuedDLCardViewModel(
     val filterText: StateFlow<String> = savedStateHandle.getStateFlow("filter_text", "")
     val yearFilter: StateFlow<Int?> = savedStateHandle.getStateFlow("year_filter", null as Int?)
     val entityFilter: StateFlow<String?> = savedStateHandle.getStateFlow("entity_filter", null as String?)
+    val isRefreshing: StateFlow<Boolean> = savedStateHandle.getStateFlow("is_refreshing", false)
 
     enum class SortOption { MUNICIPALITY, YEAR_DESC, TOTAL_DESC }
     val sortOption: StateFlow<SortOption> = savedStateHandle.getStateFlow("sort_option", SortOption.MUNICIPALITY)
@@ -44,13 +46,34 @@ class IssuedDLCardViewModel(
 
     fun fetchIssuedDL() {
         viewModelScope.launch {
+            savedStateHandle["is_refreshing"] = true
             _uiState.value = IssuedDLCardUiState.Loading
             try {
                 repository.fetchAndCacheIssuedDL(token, languageId)
                 val data = repository.getAllFromDb()
-                _uiState.value = IssuedDLCardUiState.Success(data)
+                if (data.isEmpty()) {
+                    _uiState.value = IssuedDLCardUiState.Error("Nema podataka za prikaz")
+                } else {
+                    _uiState.value = IssuedDLCardUiState.Success(data)
+                }
+            } catch (e: java.net.UnknownHostException) {
+                _uiState.value = IssuedDLCardUiState.Error("Nema internet konekcije. Provjerite vašu mrežu.")
+            } catch (e: java.net.SocketTimeoutException) {
+                _uiState.value = IssuedDLCardUiState.Error("Vremensko ograničenje konekcije. Pokušajte ponovo.")
+            } catch (e: retrofit2.HttpException) {
+                val errorMessage = when (e.code()) {
+                    401 -> "Neautorizovan pristup. Provjerite vaš token."
+                    403 -> "Zabranjen pristup."
+                    404 -> "Podaci nisu pronađeni."
+                    500 -> "Greška na serveru. Pokušajte kasnije."
+                    else -> "Greška mreže: ${e.code()}"
+                }
+                _uiState.value = IssuedDLCardUiState.Error(errorMessage)
             } catch (e: Exception) {
-                _uiState.value = IssuedDLCardUiState.Error(e.message ?: "Unknown error")
+                Log.e("IssuedDLCardViewModel", "Error fetching data", e)
+                _uiState.value = IssuedDLCardUiState.Error("Greška: ${e.message ?: "Nepoznata greška"}")
+            } finally {
+                savedStateHandle["is_refreshing"] = false
             }
         }
     }
@@ -91,9 +114,15 @@ class IssuedDLCardViewModel(
                     SortOption.YEAR_DESC -> entityFiltered.sortedByDescending { it.year ?: 0 }
                     SortOption.TOTAL_DESC -> entityFiltered.sortedByDescending { it.total ?: 0 }
                 }
-                _uiState.value = IssuedDLCardUiState.Success(sorted)
+                
+                if (sorted.isEmpty()) {
+                    _uiState.value = IssuedDLCardUiState.Error("Nema podataka koji odgovaraju vašim filterima")
+                } else {
+                    _uiState.value = IssuedDLCardUiState.Success(sorted)
+                }
             } catch (e: Exception) {
-                _uiState.value = IssuedDLCardUiState.Error(e.message ?: "Unknown error")
+                Log.e("IssuedDLCardViewModel", "Error filtering data", e)
+                _uiState.value = IssuedDLCardUiState.Error("Greška pri filtriranju: ${e.message ?: "Nepoznata greška"}")
             }
         }
     }
