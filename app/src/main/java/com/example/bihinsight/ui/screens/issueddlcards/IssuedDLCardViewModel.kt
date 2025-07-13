@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.update
 import retrofit2.HttpException
+import kotlinx.coroutines.flow.collect
 
 sealed class IssuedDLCardUiState {
     object Loading : IssuedDLCardUiState()
@@ -48,31 +49,12 @@ class IssuedDLCardViewModel(
         viewModelScope.launch {
             savedStateHandle["is_refreshing"] = true
             _uiState.value = IssuedDLCardUiState.Loading
-            try {
-                repository.fetchAndCacheIssuedDL(token, languageId)
-                val data = repository.getAllFromDb()
+            repository.getIssuedDLCardData(token, languageId).collect { data ->
                 if (data.isEmpty()) {
                     _uiState.value = IssuedDLCardUiState.Error("Nema podataka za prikaz")
                 } else {
-                _uiState.value = IssuedDLCardUiState.Success(data)
+                    _uiState.value = IssuedDLCardUiState.Success(data)
                 }
-            } catch (e: java.net.UnknownHostException) {
-                _uiState.value = IssuedDLCardUiState.Error("Nema internet konekcije. Provjerite vašu mrežu.")
-            } catch (e: java.net.SocketTimeoutException) {
-                _uiState.value = IssuedDLCardUiState.Error("Vremensko ograničenje konekcije. Pokušajte ponovo.")
-            } catch (e: retrofit2.HttpException) {
-                val errorMessage = when (e.code()) {
-                    401 -> "Neautorizovan pristup. Provjerite vaš token."
-                    403 -> "Zabranjen pristup."
-                    404 -> "Podaci nisu pronađeni."
-                    500 -> "Greška na serveru. Pokušajte kasnije."
-                    else -> "Greška mreže: ${e.code()}"
-                }
-                _uiState.value = IssuedDLCardUiState.Error(errorMessage)
-            } catch (e: Exception) {
-                Log.e("IssuedDLCardViewModel", "Error fetching data", e)
-                _uiState.value = IssuedDLCardUiState.Error("Greška: ${e.message ?: "Nepoznata greška"}")
-            } finally {
                 savedStateHandle["is_refreshing"] = false
             }
         }

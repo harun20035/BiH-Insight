@@ -6,6 +6,8 @@ import com.example.bihinsight.data.model.IssuedDLCard
 import com.example.bihinsight.data.remote.IssuedDLCardApiService
 import com.example.bihinsight.data.remote.LanguageRequest
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
 class IssuedDLCardRepository(
@@ -45,6 +47,19 @@ class IssuedDLCardRepository(
     suspend fun updateCard(card: IssuedDLCardEntity) = withContext(Dispatchers.IO) { dao.updateCard(card) }
 
     fun observeFavorites() = dao.observeFavorites()
+
+    fun getIssuedDLCardData(token: String? = null, languageId: Int = 1): Flow<List<IssuedDLCardEntity>> = flow {
+        try {
+            val response = apiService.getIssuedDLCards(token, LanguageRequest(languageId))
+            val entities = response.result.map { it.toEntity() }
+            dao.deleteAll()
+            dao.insertAll(entities)
+            emit(entities)
+        } catch (e: Exception) {
+            val cached = dao.getAllIssuedDL()
+            emit(cached)
+        }
+    }
 }
 
 // Mapiranje iz IssuedDLCard (API model) u IssuedDLCardEntity (baza)

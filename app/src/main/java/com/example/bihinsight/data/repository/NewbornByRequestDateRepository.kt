@@ -6,6 +6,8 @@ import com.example.bihinsight.data.model.NewbornByRequestDate
 import com.example.bihinsight.data.remote.NewbornByRequestDateApiService
 import com.example.bihinsight.data.remote.LanguageRequest
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
 class NewbornByRequestDateRepository(
@@ -45,6 +47,19 @@ class NewbornByRequestDateRepository(
     suspend fun updateNewborn(newborn: NewbornByRequestDateEntity) = withContext(Dispatchers.IO) { dao.updateNewborn(newborn) }
 
     fun observeFavorites() = dao.observeFavorites()
+
+    fun getNewbornByRequestDateData(token: String? = null, languageId: Int = 1): Flow<List<NewbornByRequestDateEntity>> = flow {
+        try {
+            val response = apiService.getNewborns(token, LanguageRequest(languageId))
+            val entities = response.result.map { it.toEntity() }
+            dao.deleteAll()
+            dao.insertAll(entities)
+            emit(entities)
+        } catch (e: Exception) {
+            val cached = dao.getAllNewborns()
+            emit(cached)
+        }
+    }
 }
 
 fun NewbornByRequestDate.toEntity(): NewbornByRequestDateEntity = NewbornByRequestDateEntity(

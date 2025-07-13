@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.update
 import retrofit2.HttpException
+import kotlinx.coroutines.flow.collect
 
 sealed class NewbornByRequestDateUiState {
     object Loading : NewbornByRequestDateUiState()
@@ -47,31 +48,12 @@ class NewbornByRequestDateViewModel(
         viewModelScope.launch {
             savedStateHandle["is_refreshing"] = true
             _uiState.value = NewbornByRequestDateUiState.Loading
-            try {
-                repository.fetchAndCacheNewborns(token, languageId)
-                val data = repository.getAllFromDb()
+            repository.getNewbornByRequestDateData(token, languageId).collect { data ->
                 if (data.isEmpty()) {
                     _uiState.value = NewbornByRequestDateUiState.Error("Nema podataka za prikaz")
                 } else {
                     _uiState.value = NewbornByRequestDateUiState.Success(data)
                 }
-            } catch (e: java.net.UnknownHostException) {
-                _uiState.value = NewbornByRequestDateUiState.Error("Nema internet konekcije. Provjerite vašu mrežu.")
-            } catch (e: java.net.SocketTimeoutException) {
-                _uiState.value = NewbornByRequestDateUiState.Error("Vremensko ograničenje konekcije. Pokušajte ponovo.")
-            } catch (e: retrofit2.HttpException) {
-                val errorMessage = when (e.code()) {
-                    401 -> "Neautorizovan pristup. Provjerite vaš token."
-                    403 -> "Zabranjen pristup."
-                    404 -> "Podaci nisu pronađeni."
-                    500 -> "Greška na serveru. Pokušajte kasnije."
-                    else -> "Greška mreže: ${e.code()}"
-                }
-                _uiState.value = NewbornByRequestDateUiState.Error(errorMessage)
-            } catch (e: Exception) {
-                Log.e("NewbornByRequestDateViewModel", "Error fetching data", e)
-                _uiState.value = NewbornByRequestDateUiState.Error("Greška: ${e.message ?: "Nepoznata greška"}")
-            } finally {
                 savedStateHandle["is_refreshing"] = false
             }
         }

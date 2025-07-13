@@ -6,6 +6,8 @@ import com.example.bihinsight.data.model.PersonsByRecordDate
 import com.example.bihinsight.data.remote.PersonsByRecordDateApiService
 import com.example.bihinsight.data.remote.LanguageRequest
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
 class PersonsByRecordDateRepository(
@@ -45,6 +47,19 @@ class PersonsByRecordDateRepository(
     suspend fun updatePerson(person: PersonsByRecordDateEntity) = withContext(Dispatchers.IO) { dao.updatePerson(person) }
 
     fun observeFavorites() = dao.observeFavorites()
+
+    fun getPersonsByRecordDateData(token: String? = null, languageId: Int = 1): Flow<List<PersonsByRecordDateEntity>> = flow {
+        try {
+            val response = apiService.getPersonsByRecordDate(token, LanguageRequest(languageId))
+            val entities = response.result.map { it.toEntity() }
+            dao.deleteAll()
+            dao.insertAll(entities)
+            emit(entities)
+        } catch (e: Exception) {
+            val cached = dao.getAllPersonsByRecordDate()
+            emit(cached)
+        }
+    }
 }
 
 // Mapiranje iz PersonsByRecordDate (API model) u PersonsByRecordDateEntity (baza)
