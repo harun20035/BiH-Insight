@@ -54,7 +54,7 @@ class IssuedDLCardViewModel(
                 if (data.isEmpty()) {
                     _uiState.value = IssuedDLCardUiState.Error("Nema podataka za prikaz")
                 } else {
-                    _uiState.value = IssuedDLCardUiState.Success(data)
+                _uiState.value = IssuedDLCardUiState.Success(data)
                 }
             } catch (e: java.net.UnknownHostException) {
                 _uiState.value = IssuedDLCardUiState.Error("Nema internet konekcije. Provjerite vašu mrežu.")
@@ -118,7 +118,7 @@ class IssuedDLCardViewModel(
                 if (sorted.isEmpty()) {
                     _uiState.value = IssuedDLCardUiState.Error("Nema podataka koji odgovaraju vašim filterima")
                 } else {
-                    _uiState.value = IssuedDLCardUiState.Success(sorted)
+                _uiState.value = IssuedDLCardUiState.Success(sorted)
                 }
             } catch (e: Exception) {
                 Log.e("IssuedDLCardViewModel", "Error filtering data", e)

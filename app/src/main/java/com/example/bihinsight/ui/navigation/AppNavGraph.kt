@@ -122,14 +122,14 @@ fun AppNavGraph(
                     )
                 }
                 else -> {
-                    IssuedDLCardScreen(
-                        viewModel,
-                        onCardClick = { cardId -> navController.navigate("details/$cardId") },
-                        onFavoritesClick = { navController.navigate("favorites") },
-                        onDatasetClick = { navController.navigate("dataset_selection") },
+            IssuedDLCardScreen(
+                viewModel,
+                onCardClick = { cardId -> navController.navigate("details/$cardId") },
+                onFavoritesClick = { navController.navigate("favorites") },
+                onDatasetClick = { navController.navigate("dataset_selection") },
                         onChartClick = { navController.navigate("chart") },
                         onSettingsClick = { navController.navigate("settings") }
-                    )
+            )
                 }
             }
         }
