@@ -65,6 +65,7 @@ fun NewbornByRequestDateChartScreen(
 fun BarChart(newborns: List<NewbornByRequestDateEntity>) {
     val top10 = newborns.sortedByDescending { it.total ?: 0 }.take(10)
     val maxTotal = top10.maxOfOrNull { it.total ?: 0 } ?: 1
+    val maxBarWidth = 160.dp
     Column(modifier = Modifier.fillMaxWidth()) {
         top10.forEach { newborn ->
             val percent = (newborn.total?.toFloat() ?: 0f) / maxTotal
@@ -80,14 +81,16 @@ fun BarChart(newborns: List<NewbornByRequestDateEntity>) {
                 Box(
                     modifier = Modifier
                         .height(24.dp)
-                        .width((200 * percent).dp)
+                        .width((maxBarWidth * percent).coerceAtLeast(8.dp))
                         .padding(end = 8.dp)
                         .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
                 )
                 Text(
                     text = newborn.total?.toString() ?: "-",
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(start = 8.dp)
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .widthIn(min = 32.dp)
                 )
             }
         }
