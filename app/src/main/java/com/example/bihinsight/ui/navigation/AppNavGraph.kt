@@ -170,9 +170,13 @@ fun AppNavGraph(
                             context.startActivity(shareIntent)
                         }
                     )
-                } ?: Text("Podatak nije pronađen.")
+                } ?: Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Podatak nije pronađen.")
+                }
             } else {
-                Text("Podatak nije pronađen.")
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Podatak nije pronađen.")
+                }
             }
         }
         composable("favorites") {
@@ -228,9 +232,13 @@ fun AppNavGraph(
                             context.startActivity(shareIntent)
                         }
                     )
-                } ?: Text("Podatak nije pronađen.")
+                } ?: Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Podatak nije pronađen.")
+                }
             } else {
-                Text("Podatak nije pronađen.")
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Podatak nije pronađen.")
+                }
             }
         }
         
@@ -288,9 +296,13 @@ fun AppNavGraph(
                             context.startActivity(shareIntent)
                         }
                     )
-                } ?: Text("Podatak nije pronađen.")
+                } ?: Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Podatak nije pronađen.")
+                }
             } else {
-                Text("Podatak nije pronađen.")
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Podatak nije pronađen.")
+                }
             }
         }
         composable("newborn_favorites") {
