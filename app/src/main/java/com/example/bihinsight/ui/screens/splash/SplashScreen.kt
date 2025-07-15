@@ -20,7 +20,6 @@ fun SplashScreen() {
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            // Ako imaš logo, koristi Image(painterResource(id = R.drawable.ic_launcher_foreground), ...)
             Image(
                 painter = painterResource(id = R.drawable.ic_launcher_foreground),
                 contentDescription = "Logo",

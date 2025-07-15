@@ -67,7 +67,7 @@ Aplikacija BiHInsight koristi Model-View-ViewModel (MVVM) arhitekturu, koja omog
 ### 2. Detalji podatka
 <img src="images/dataset_view.png" alt="Detalji podatka" width="220"/>
 
-*Klikom na stavku iz liste otvara se detaljan prikaz sa svim informacijama o tom podatku. Ekran prikazuje sve relevantne informacije u organizovanom formatu, omogućava dijeljenje podataka, te nudi opciju dodavanja u favorite. Detaljni prikaz je optimizovan za čitljivost i korisničko iskustvo.*
+*Prikazuje listu podataka iz odabranog dataset-a. Omogućava filtriranje, sortiranje i pretragu. Lista je optimizovana za performanse sa LazyColumn, podržava pull-to-refresh funkcionalnost, te prikazuje loading stanja i error poruke. Svaka stavka u listi je klikabilna i vodi ka detaljnom prikazu.*
 
 ### 3. Filteri i pretraga
 <img src="images/filters.png" alt="Filteri" width="220"/>
@@ -77,7 +77,7 @@ Aplikacija BiHInsight koristi Model-View-ViewModel (MVVM) arhitekturu, koja omog
 ### 4. Prikaz podataka (Lista)
 <img src="images/data_view.png" alt="Prikaz podataka" width="220"/>
 
-*Prikazuje listu podataka iz odabranog dataset-a. Omogućava filtriranje, sortiranje i pretragu. Lista je optimizovana za performanse sa LazyColumn, podržava pull-to-refresh funkcionalnost, te prikazuje loading stanja i error poruke. Svaka stavka u listi je klikabilna i vodi ka detaljnom prikazu.*
+*Klikom na stavku iz liste otvara se detaljan prikaz sa svim informacijama o tom podatku. Ekran prikazuje sve relevantne informacije u organizovanom formatu, omogućava dijeljenje podataka, te nudi opciju dodavanja u favorite. Detaljni prikaz je optimizovan za čitljivost i korisničko iskustvo.*
 
 ### 5. Izbor skupa podataka / Onboarding
 <img src="images/dataset_selection.png" alt="Onboarding" width="220"/>
@@ -297,7 +297,7 @@ fun IssuedDLCardScreen(viewModel: IssuedDLCardViewModel) {
 
 ### Room Database
 
-Room je persistence biblioteka koja pruža apstrakciju nad SQLite bazom podataka. U aplikaciji se koristi za lokalno čuvanje podataka, omogućava offline rad, te pruža reaktivno praćenje promjena kroz Flow. Room automatski generiše SQL kod na osnovu anotacija, što smanjuje mogućnost grešaka i ubrzava razvoj.
+Room je biblioteka koja pruža apstrakciju nad SQLite bazom podataka. U aplikaciji se koristi za lokalno čuvanje podataka, omogućava offline rad, te pruža reaktivno praćenje promjena kroz Flow. Room automatski generiše SQL kod na osnovu anotacija, što smanjuje mogućnost grešaka i ubrzava razvoj.
 
 **Ključne karakteristike:**
 - **Entity klase** - Definišu strukturu tabele
