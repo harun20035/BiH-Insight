@@ -141,9 +141,6 @@ class MainActivity : ComponentActivity() {
         }
         
         android.util.Log.d("ConfigChange", "Orientation: $orientation, Screen: $screenSize, Theme: $uiMode")
-        
-        // Ovdje možete dodati dodatnu logiku za obradu promjena
-        // Na primjer, ažuriranje UI-a, ponovno učitavanje podataka, itd.
     }
 }
 
