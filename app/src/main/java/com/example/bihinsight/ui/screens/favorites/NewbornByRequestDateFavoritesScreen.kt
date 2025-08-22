@@ -15,15 +15,21 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.bihinsight.data.local.NewbornByRequestDateEntity
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.platform.LocalContext
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,9 +39,26 @@ fun NewbornByRequestDateFavoritesScreen(
     onBack: () -> Unit = {},
     onToggleFavorite: (Int, Boolean) -> Unit = { _, _ -> }
 ) {
+    val context = LocalContext.current
+    
+    // Copy to clipboard funkcija
+    fun copyToClipboard(newborn: NewbornByRequestDateEntity) {
+        val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clipData = ClipData.newPlainText(
+            "Podaci o novorođenim osobama",
+            """
+            Općina: ${newborn.municipality ?: "Nepoznato"}
+            Godina: ${newborn.year ?: "-"}
+            Ukupno: ${newborn.total ?: "-"}
+            """.trimIndent()
+        )
+        clipboardManager.setPrimaryClip(clipData)
+        Toast.makeText(context, "Podaci kopirani u clipboard!", Toast.LENGTH_SHORT).show()
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
-            title = { Text("Favoriti", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onPrimary) },
+            title = { Text("Favoriti - Novorođene osobe", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onPrimary) },
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 titleContentColor = MaterialTheme.colorScheme.onPrimary,
@@ -64,36 +87,75 @@ fun NewbornByRequestDateFavoritesScreen(
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surface
                         ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onNewbornClick(newborn.id) }
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Row(
-                            modifier = Modifier.padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = "Općina: ${newborn.municipality ?: "Nepoznato"}",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                Text(
-                                    text = "Godina: ${newborn.year ?: "-"}",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                                Text(
-                                    text = "Ukupno: ${newborn.total ?: "-"}",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            // Glavni podaci - klikabilni za otvaranje detalja
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onNewbornClick(newborn.id) }
+                            ) {
+                                Column {
+                                    Text(
+                                        text = "Općina: ${newborn.municipality ?: "Nepoznato"}",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    Text(
+                                        text = "Godina: ${newborn.year ?: "-"}",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    Text(
+                                        text = "Ukupno: ${newborn.total ?: "-"}",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
                             }
-                            IconButton(onClick = { onToggleFavorite(newborn.id, !newborn.isFavorite) }) {
-                                Icon(
-                                    imageVector = if (newborn.isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
-                                    contentDescription = if (newborn.isFavorite) "Ukloni iz favorita" else "Dodaj u favorite",
-                                    tint = if (newborn.isFavorite) Color(0xFFFFC107) else MaterialTheme.colorScheme.onSurface
-                                )
+                            
+                            Spacer(modifier = Modifier.height(12.dp))
+                            
+                            // Action dugmad
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Button(
+                                    onClick = { copyToClipboard(newborn) },
+                                    modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                    )
+                                ) {
+                                    Icon(
+                                        Icons.Filled.Info,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Kopiraj")
+                                }
+                                
+                                Button(
+                                    onClick = { onNewbornClick(newborn.id) },
+                                    modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary
+                                    )
+                                ) {
+                                    Text("Detalji")
+                                }
+                                
+                                IconButton(onClick = { onToggleFavorite(newborn.id, !newborn.isFavorite) }) {
+                                    Icon(
+                                        Icons.Filled.Star,
+                                        contentDescription = if (newborn.isFavorite) "Ukloni iz favorita" else "Dodaj u favorite",
+                                        tint = if (newborn.isFavorite) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
                             }
                         }
                     }

@@ -23,8 +23,22 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.platform.LocalContext
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,6 +47,23 @@ fun FavoritesScreen(
     onCardClick: (Int) -> Unit,
     onBack: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    
+    // Copy to clipboard funkcija
+    fun copyToClipboard(card: IssuedDLCardEntity) {
+        val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clipData = ClipData.newPlainText(
+            "Podaci o vozačkoj dozvoli",
+            """
+            Općina: ${card.municipality ?: "Nepoznato"}
+            Godina: ${card.year ?: "-"}
+            Ukupno: ${card.total ?: "-"}
+            """.trimIndent()
+        )
+        clipboardManager.setPrimaryClip(clipData)
+        Toast.makeText(context, "Podaci kopirani u clipboard!", Toast.LENGTH_SHORT).show()
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
             title = { 
@@ -70,24 +101,66 @@ fun FavoritesScreen(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(4.dp)
-                                .then(Modifier)
-                                .clickable { onCardClick(card.id) }
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
-                                Text(
-                                    text = "Općina: ${card.municipality ?: "Nepoznato"}",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                Text(
-                                    text = "Godina: ${card.year ?: "-"}",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                                Text(
-                                    text = "Ukupno: ${card.total ?: "-"}",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
+                                // Glavni podaci - klikabilni za otvaranje detalja
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { onCardClick(card.id) }
+                                ) {
+                                    Column {
+                                        Text(
+                                            text = "Općina: ${card.municipality ?: "Nepoznato"}",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                        Text(
+                                            text = "Godina: ${card.year ?: "-"}",
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                        Text(
+                                            text = "Ukupno: ${card.total ?: "-"}",
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    }
+                                }
+                                
+                                Spacer(modifier = Modifier.height(12.dp))
+                                
+                                // Action dugmad
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Button(
+                                        onClick = { copyToClipboard(card) },
+                                        modifier = Modifier.weight(1f),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                        )
+                                    ) {
+                                        Icon(
+                                            Icons.Filled.Info,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text("Kopiraj")
+                                    }
+                                    
+                                    Button(
+                                        onClick = { onCardClick(card.id) },
+                                        modifier = Modifier.weight(1f),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.primary
+                                        )
+                                    ) {
+                                        Text("Detalji")
+                                    }
+                                }
                             }
                         }
                     }

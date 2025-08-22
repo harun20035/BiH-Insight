@@ -1,39 +1,67 @@
 package com.example.bihinsight.ui.screens.details
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.example.bihinsight.data.local.IssuedDLCardEntity
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.ui.graphics.Color
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.ui.text.font.FontWeight
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
+import com.example.bihinsight.data.local.IssuedDLCardEntity
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IssuedDLCardDetailsScreen(
     card: IssuedDLCardEntity,
     onBack: () -> Unit,
-    onToggleFavorite: (Boolean) -> Unit = {},
-    onShare: (String) -> Unit = {}
+    onToggleFavorite: (Boolean) -> Unit,
+    onShare: (String) -> Unit
 ) {
+    val context = LocalContext.current
+    
+    // Copy to clipboard funkcija
+    fun copyToClipboard() {
+        val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clipData = ClipData.newPlainText(
+            "Podaci o vozačkoj dozvoli",
+            """
+            Općina: ${card.municipality ?: "Nepoznato"}
+            Kanton: ${card.canton ?: "Nepoznato"}
+            Entitet: ${card.entity ?: "Nepoznato"}
+            Institucija: ${card.institution ?: "Nepoznato"}
+            Godina: ${card.year ?: "-"}
+            Mjesec: ${card.month ?: "-"}
+            Datum ažuriranja: ${card.dateUpdate ?: "-"}
+            
+            Prvi put izdano (muškarci): ${card.issuedFirstTimeMaleTotal ?: "-"}
+            Zamijenjeno (muškarci): ${card.replacedMaleTotal ?: "-"}
+            Prvi put izdano (žene): ${card.issuedFirstTimeFemaleTotal ?: "-"}
+            Zamijenjeno (žene): ${card.replacedFemaleTotal ?: "-"}
+            
+            Ukupno: ${card.total ?: "-"}
+            """.trimIndent()
+        )
+        clipboardManager.setPrimaryClip(clipData)
+        Toast.makeText(context, "Podaci kopirani u clipboard!", Toast.LENGTH_SHORT).show()
+    }
+
     Surface(modifier = Modifier.fillMaxSize()) {
         Column {
             TopAppBar(
                 title = { 
                     Text(
-                        text = "Detalji",
+                        text = "Detalji vozačke dozvole",
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onPrimary
                     )
@@ -46,49 +74,152 @@ fun IssuedDLCardDetailsScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Nazad")
+                        Icon(
+                            Icons.Filled.ArrowBack, 
+                            contentDescription = "Nazad"
+                        )
                     }
                 },
                 actions = {
-                    IconButton(onClick = { onToggleFavorite(!card.isFavorite) }) {
+                    // Copy to clipboard dugme
+                    IconButton(onClick = { copyToClipboard() }) {
                         Icon(
-                            imageVector = if (card.isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
-                            contentDescription = if (card.isFavorite) "Ukloni iz favorita" else "Dodaj u favorite",
-                            tint = if (card.isFavorite) Color(0xFFFFC107) else MaterialTheme.colorScheme.onSurface
+                            Icons.Filled.Info,
+                            contentDescription = "Kopiraj u clipboard"
                         )
                     }
-                    IconButton(onClick = {
-                        val shareText = "Općina: ${card.municipality ?: "Nepoznato"}\n" +
-                            "Godina: ${card.year ?: "-"}\n" +
-                            "Ukupno: ${card.total ?: "-"}\n" +
-                            "Više u aplikaciji BiH Insight!"
+                    
+                    // Favorite dugme
+                    IconButton(onClick = { onToggleFavorite(!card.isFavorite) }) {
+                        Icon(
+                            Icons.Filled.Star,
+                            contentDescription = if (card.isFavorite) "Ukloni iz favorita" else "Dodaj u favorite",
+                            tint = if (card.isFavorite) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                    
+                    // Share dugme
+                    IconButton(onClick = { 
+                        val shareText = """
+                            Podaci o vozačkoj dozvoli:
+                            Općina: ${card.municipality ?: "Nepoznato"}
+                            Godina: ${card.year ?: "-"}
+                            Ukupno izdano: ${card.total ?: "-"}
+                        """.trimIndent()
                         onShare(shareText)
                     }) {
-                        Icon(Icons.Filled.Share, contentDescription = "Podijeli")
+                        Icon(
+                            Icons.Filled.Share,
+                            contentDescription = "Podijeli"
+                        )
                     }
                 }
             )
+            
             Column(modifier = Modifier.padding(24.dp)) {
+                // Success message za copy
+                var showCopySuccess by remember { mutableStateOf(false) }
+                
+                if (showCopySuccess) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Filled.Info,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = "Podaci uspješno kopirani u clipboard!",
+                                color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                    
+                    LaunchedEffect(Unit) {
+                        delay(3000)
+                        showCopySuccess = false
+                    }
+                }
+                
                 Text(
                     text = "Detalji o izdatim vozačkim dozvolama",
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
-                Text(text = "Općina: ${card.municipality ?: "Nepoznato"}")
-                Text(text = "Kanton: ${card.canton ?: "Nepoznato"}")
-                Text(text = "Entitet: ${card.entity ?: "Nepoznato"}")
-                Text(text = "Institucija: ${card.institution ?: "Nepoznato"}")
-                Text(text = "Godina: ${card.year ?: "-"}")
-                Text(text = "Mjesec: ${card.month ?: "-"}")
-                Text(text = "Datum ažuriranja: ${card.dateUpdate ?: "-"}")
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Prvi put izdano (muškarci): ${card.issuedFirstTimeMaleTotal ?: "-"}")
-                Text(text = "Zamijenjeno (muškarci): ${card.replacedMaleTotal ?: "-"}")
-                Text(text = "Prvi put izdano (žene): ${card.issuedFirstTimeFemaleTotal ?: "-"}")
-                Text(text = "Zamijenjeno (žene): ${card.replacedFemaleTotal ?: "-"}")
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Ukupno: ${card.total ?: "-"}", style = MaterialTheme.typography.titleMedium)
+                
+                // Podaci u card formatu
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        DetailRow("Općina", card.municipality ?: "Nepoznato")
+                        DetailRow("Kanton", card.canton ?: "Nepoznato")
+                        DetailRow("Entitet", card.entity ?: "Nepoznato")
+                        DetailRow("Institucija", card.institution ?: "Nepoznato")
+                        DetailRow("Godina", card.year?.toString() ?: "-")
+                        DetailRow("Mjesec", card.month?.toString() ?: "-")
+                        DetailRow("Datum ažuriranja", card.dateUpdate ?: "-")
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        DetailRow("Prvi put izdano (muškarci)", card.issuedFirstTimeMaleTotal?.toString() ?: "-")
+                        DetailRow("Zamijenjeno (muškarci)", card.replacedMaleTotal?.toString() ?: "-")
+                        DetailRow("Prvi put izdano (žene)", card.issuedFirstTimeFemaleTotal?.toString() ?: "-")
+                        DetailRow("Zamijenjeno (žene)", card.replacedFemaleTotal?.toString() ?: "-")
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        DetailRow(
+                            "Ukupno", 
+                            card.total?.toString() ?: "-",
+                            isTotal = true
+                        )
+                    }
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun DetailRow(
+    label: String,
+    value: String,
+    isTotal: Boolean = false
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = label,
+            style = if (isTotal) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyMedium,
+            fontWeight = if (isTotal) FontWeight.Bold else FontWeight.Normal,
+            color = if (isTotal) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = value,
+            style = if (isTotal) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyMedium,
+            fontWeight = if (isTotal) FontWeight.Bold else FontWeight.Normal,
+            color = if (isTotal) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+        )
     }
 } 
