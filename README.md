@@ -51,7 +51,7 @@ Aplikacija BiHInsight koristi Model-View-ViewModel (MVVM) arhitekturu, koja omog
 
 ## Dijagram arhitekture
 
-<img src="images/BiH_Insight_diagram.png" alt="MVVM Arhitektura" width="550"/>
+<img src="documentation/images/BiH_Insight_diagram.png" alt="MVVM Arhitektura" width="550"/>
 
 *Dijagram prikazuje MVVM arhitekturu aplikacije: View sloj (Jetpack Compose UI) komunicira sa ViewModel slojem (business logic, coroutines, stateflow), koji koordinira podatke kroz Repository sloj. Repository pristupa lokalnoj bazi (Room: Database, Entities, Dao) i udaljenom API-ju (Retrofit API: Data from API).*
 
@@ -60,49 +60,49 @@ Aplikacija BiHInsight koristi Model-View-ViewModel (MVVM) arhitekturu, koja omog
 ## Funkcionalnosti aplikacije (sa screenshotovima)
 
 ### 1. Početni ekran / Home
-<img src="images/home_screen.png" alt="Home" width="220"/>
+<img src="documentation/images/home_screen.png" alt="Home" width="220"/>
 
 *Glavni ekran sa izborom datasetova i navigacijom ka ostalim funkcionalnostima. Korisnik može odabrati različite skupove podataka za pregled, uključujući izdate vozačke dozvole, podatke o novorođenčadi i registraciju osoba. Ekran prikazuje jasnu navigaciju ka svim dostupnim funkcionalnostima aplikacije.*
 
 ### 2. Detalji podatka
-<img src="images/dataset_view.png" alt="Detalji podatka" width="220"/>
+<img src="documentation/images/dataset_view.png" alt="Detalji podatka" width="220"/>
 
 *Prikazuje listu podataka iz odabranog dataset-a. Omogućava filtriranje, sortiranje i pretragu. Lista je optimizovana za performanse sa LazyColumn, podržava pull-to-refresh funkcionalnost, te prikazuje loading stanja i error poruke. Svaka stavka u listi je klikabilna i vodi ka detaljnom prikazu.*
 
 ### 3. Filteri i pretraga
-<img src="images/filters.png" alt="Filteri" width="220"/>
+<img src="documentation/images/filters.png" alt="Filteri" width="220"/>
 
 *Korisnik može filtrirati i pretraživati podatke po relevantnim kriterijima (npr. općina, status, period). Sistem filtriranja podržava više kriterija istovremeno, omogućava sortiranje rezultata, te pruža real-time pretragu. Filteri su intuitivni i omogućavaju brzo pronalaženje željenih podataka.*
 
 ### 4. Prikaz podataka (Lista)
-<img src="images/data_view.png" alt="Prikaz podataka" width="220"/>
+<img src="documentation/images/data_view.png" alt="Prikaz podataka" width="220"/>
 
 *Klikom na stavku iz liste otvara se detaljan prikaz sa svim informacijama o tom podatku. Ekran prikazuje sve relevantne informacije u organizovanom formatu, omogućava dijeljenje podataka, te nudi opciju dodavanja u favorite. Detaljni prikaz je optimizovan za čitljivost i korisničko iskustvo.*
 
 ### 5. Izbor skupa podataka / Onboarding
-<img src="images/dataset_selection.png" alt="Onboarding" width="220"/>
+<img src="documentation/images/dataset_selection.png" alt="Onboarding" width="220"/>
 
 *Omogućava korisniku odabir preferencija ili početnog dataset-a. Prvi korak u personalizaciji iskustva. Ekran prikazuje sve dostupne skupove podataka sa kratkim opisima, omogućava jednostavan odabir, te pamti korisničke preferencije za buduće sesije.*
 
 ### 6. Favoriti
-<img src="images/favorites.png" alt="Favoriti" width="220"/>
+<img src="documentation/images/favorites.png" alt="Favoriti" width="220"/>
 
 *Korisnik može sačuvati podatke kao favorite i pregledati ih u posebnoj sekciji, dostupno i offline. Sistem favorita omogućava brz pristup često korištenim podacima, podržava organizovanje favorita, te omogućava brzo uklanjanje iz liste favorita. Podaci se čuvaju lokalno i dostupni su bez internet konekcije.*
 
 ### 7. Statistika / Vizualizacija podataka (Grafikoni)
-<img src="images/statistics1.png" alt="Statistika 1" width="220"/>
-<img src="images/statistics2.png" alt="Statistika 2" width="220"/>
-<img src="images/statistics3.png" alt="Statistika 3" width="220"/>
+<img src="docuemntation/images/statistics1.png" alt="Statistika 1" width="220"/>
+<img src="documentation/images/statistics2.png" alt="Statistika 2" width="220"/>
+<img src="docuemntation/images/statistics3.png" alt="Statistika 3" width="220"/>
 
 *Prikaz statističkih podataka kroz grafikone (bar chart, pie chart, line chart). Vizualizacija podataka omogućava bolje razumijevanje trendova i obrazaca u podacima. Grafikoni su interaktivni, podržavaju zoom funkcionalnost, te omogućavaju eksport podataka. Različiti tipovi grafikona su prilagođeni različitim vrstama podataka.*
 
 ### 8. Podešavanja
-<img src="images/settings.png" alt="Podešavanja" width="220"/>
+<img src="documentation/images/settings.png" alt="Podešavanja" width="220"/>
 
 *Ekran za podešavanje preferencija, tema, i drugih opcija aplikacije. Korisnik trenutno na ovome ekranu može promjeniti temu.*
 
 ### 9. Tamna tema
-<img src="images/dark_theme.png" alt="Dark theme" width="220"/>
+<img src="documentation/images/dark_theme.png" alt="Dark theme" width="220"/>
 
 *Aplikacija podržava tamnu temu radi boljeg korisničkog iskustva u uslovima slabog osvjetljenja. Tamna tema je implementirana koristeći Material 3 Design sistem, te omogućava ručno prebacivanje između svijetle i tamne teme.*
 
