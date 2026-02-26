@@ -371,7 +371,6 @@ fun IssuedDLCardList(cards: List<IssuedDLCardEntity>, onCardClick: (Int) -> Unit
                         text = "Ukupno: ${card.total ?: "-"}",
                         style = MaterialTheme.typography.bodyMedium
                     )
-                    // Dodaj još informacija po želji
                 }
             }
         }
