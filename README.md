@@ -90,7 +90,7 @@ Aplikacija BiHInsight koristi Model-View-ViewModel (MVVM) arhitekturu, koja omog
 *Korisnik može sačuvati podatke kao favorite i pregledati ih u posebnoj sekciji, dostupno i offline. Sistem favorita omogućava brz pristup često korištenim podacima, podržava organizovanje favorita, te omogućava brzo uklanjanje iz liste favorita. Podaci se čuvaju lokalno i dostupni su bez internet konekcije.*
 
 ### 7. Statistika / Vizualizacija podataka (Grafikoni)
-<img src="docuemntation/images/statistics1.png" alt="Statistika 1" width="220"/>
+<img src="documentation/images/statistics1.png" alt="Statistika 1" width="220"/>
 <img src="documentation/images/statistics2.png" alt="Statistika 2" width="220"/>
 <img src="docuemntation/images/statistics3.png" alt="Statistika 3" width="220"/>
 
