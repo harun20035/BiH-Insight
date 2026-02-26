@@ -92,7 +92,7 @@ Aplikacija BiHInsight koristi Model-View-ViewModel (MVVM) arhitekturu, koja omog
 ### 7. Statistika / Vizualizacija podataka (Grafikoni)
 <img src="documentation/images/statistics1.png" alt="Statistika 1" width="220"/>
 <img src="documentation/images/statistics2.png" alt="Statistika 2" width="220"/>
-<img src="documeentation/images/statistics3.png" alt="Statistika 3" width="220"/>
+<img src="documentation/images/statistics3.png" alt="Statistika 3" width="220"/>
 
 *Prikaz statističkih podataka kroz grafikone (bar chart, pie chart, line chart). Vizualizacija podataka omogućava bolje razumijevanje trendova i obrazaca u podacima. Grafikoni su interaktivni, podržavaju zoom funkcionalnost, te omogućavaju eksport podataka. Različiti tipovi grafikona su prilagođeni različitim vrstama podataka.*
 
